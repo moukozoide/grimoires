@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grimoire</title>
+<meta name="theme-color" content="#1c1922">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Grimoire">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1c1922; --bg-2:#25212d; --bg-3:#2f2a39; --line:#3d3648;
+  --ink:#ebe3d1; --ink-2:#b9b0a0; --ink-3:#857d71;
+  --chaos:#c4566b; --balance:#c2a24f; --loi:#7c9fc4; --neutre:#9a948a;
+  --warn:#e07a5f; --ok:#7fb07a;
+  --display:"IM Fell English SC", "Alegreya", serif;
+  --serif:"Alegreya", Georgia, serif;
+  --sans:"Alegreya Sans", system-ui, sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#eeebe4; --bg-2:#e3dfd6; --bg-3:#d8d3c8; --line:#c6bfb1;
+    --ink:#2a2430; --ink-2:#554d58; --ink-3:#7d7480;
+    --chaos:#a3324a; --balance:#8a6a14; --loi:#3d6690; --neutre:#6f6a62;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#eeebe4; --bg-2:#e3dfd6; --bg-3:#d8d3c8; --line:#c6bfb1;
+  --ink:#2a2430; --ink-2:#554d58; --ink-3:#7d7480;
+  --chaos:#a3324a; --balance:#8a6a14; --loi:#3d6690; --neutre:#6f6a62;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--balance);outline-offset:2px}
+
+/* ---------- desk layout (PC) ---------- */
+.desk{display:grid;grid-template-columns:minmax(320px,1fr) 410px;gap:28px;max-width:1280px;margin:0 auto;padding:24px}
+.desk.player-only{display:block;padding:0;max-width:none}
+.desk.player-only .mj{display:none}
+.phone{position:sticky;top:24px;height:calc(100vh - 48px);max-height:880px;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:var(--bg);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.desk.player-only .phone{position:static;height:auto;max-height:none;border:0;border-radius:0;box-shadow:none;overflow:visible}
+@media (max-width:860px){.desk{display:block;padding:0}.desk .mj{display:none}.phone{position:static;height:auto;max-height:none;border:0;border-radius:0;box-shadow:none;overflow:visible}}
+
+/* ---------- MJ panel ---------- */
+.mj h1{font-family:var(--display);font-weight:400;font-size:2rem;margin:0 0 4px}
+.mj .sub{color:var(--ink-2);margin:0 0 20px}
+.mj section{border-top:1px solid var(--line);padding:18px 0}
+.mj h2{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+.drop{display:block;border:1.5px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--ink-2);cursor:pointer;transition:border-color .15s,background .15s}
+.drop.over,.drop:hover{border-color:var(--balance);background:var(--bg-2)}
+.drop strong{color:var(--ink)}
+.status{margin-top:10px;color:var(--ink-2);font-size:.92rem}
+.btn{background:var(--bg-3);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+.btn:hover{border-color:var(--ink-3)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.links{list-style:none;padding:0;margin:0}
+.links li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.links li:last-child{border-bottom:0}
+.links a{color:var(--ink);text-decoration:none}
+.links a:hover{text-decoration:underline}
+.links code{color:var(--ink-3);font-size:.85rem}
+.links .cur a{color:var(--balance);font-weight:700}
+.camp-name{font-family:var(--serif);font-weight:700;margin:12px 0 2px}
+.issues{list-style:none;padding:0;margin:0}
+.issues li{padding:6px 0 6px 22px;position:relative;font-size:.95rem}
+.issues li::before{content:"";position:absolute;left:4px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.issues li.info::before{background:var(--ink-3)}
+.issues li.ok::before{background:var(--ok)}
+.diff h3{font-size:1rem;margin:12px 0 4px;font-family:var(--serif)}
+.diff ul{margin:0;padding-left:18px}
+.diff li{margin:2px 0}
+.add{color:var(--ok)} .del{color:var(--warn)}
+.muted{color:var(--ink-3)}
+.btn.primary{background:var(--balance);border-color:var(--balance);color:#1c1922;font-weight:700}
+.btn:disabled{opacity:.5;cursor:default}
+.form{display:grid;gap:8px;max-width:520px}
+.form label{display:grid;gap:3px;font-size:.9rem;color:var(--ink-2)}
+.form input{background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.pubinfo{margin:0 0 10px;color:var(--ink-2)}
+.pubinfo a{color:var(--ink)}
+.msg{margin-top:10px;font-size:.95rem}
+.msg.err{color:var(--warn)} .msg.ok{color:var(--ok)}
+.links .copy{background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:.8rem;padding:0 0 0 6px}
+.links .copy:hover{color:var(--ink)}
+
+/* ---------- player view ---------- */
+.app{display:flex;flex-direction:column;height:100%}
+.desk.player-only .app,.phone .app{min-height:100%}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.desk.player-only .scroll{overflow:visible}
+@media (max-width:860px){.scroll{overflow:visible;padding-bottom:64px}.tabs{position:fixed!important;left:0;right:0;bottom:0;z-index:5}}
+.desk.player-only .scroll{padding-bottom:64px}
+.desk.player-only .tabs{position:fixed;left:0;right:0;bottom:0;z-index:5}
+.head{padding:18px 16px 12px;background:linear-gradient(var(--bg-2),var(--bg));border-bottom:1px solid var(--line)}
+.head .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.camp{color:var(--ink-3);font-size:.85rem}
+.who select{background:var(--bg-3);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:.9rem}
+.pj{font-family:var(--display);font-size:2.1rem;line-height:1.05;margin:8px 0 10px;letter-spacing:.01em}
+.slots{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.slot{width:11px;height:11px;border:1.5px solid var(--ink-3);transform:rotate(45deg);border-radius:1px}
+.slot.on{background:var(--balance);border-color:var(--balance)}
+.slot.over{background:var(--warn);border-color:var(--warn)}
+.slots-label{flex-basis:100%;margin-top:4px;color:var(--ink-2);font-size:.9rem}
+.slots-label.over{color:var(--warn);font-weight:700}
+
+.tools{padding:12px 16px 4px;position:sticky;top:0;background:var(--bg);z-index:2}
+.search{width:100%;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.search::placeholder{color:var(--ink-3)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:transparent;cursor:pointer;font-size:.9rem;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.al-Chaos[aria-pressed="true"]{background:var(--chaos);border-color:var(--chaos);color:#fff}
+.chip.al-Balance[aria-pressed="true"]{background:var(--balance);border-color:var(--balance);color:#1c1922}
+.chip.al-Loi[aria-pressed="true"]{background:var(--loi);border-color:var(--loi);color:#1c1922}
+
+.list{padding:0 16px 24px}
+.letter{font-family:var(--display);color:var(--ink-3);font-size:1.15rem;margin:14px 0 2px;border-bottom:1px solid var(--line);padding-bottom:2px}
+.spell{display:grid;grid-template-columns:4px 1fr auto;gap:0 12px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 0;cursor:pointer}
+.spell:last-child{border-bottom:0}
+.spell .bar{align-self:stretch;border-radius:2px;background:var(--neutre)}
+.spell .nm{display:block;font-family:var(--serif);font-weight:500;font-size:1.06rem}
+.spell .meta{color:var(--ink-3);font-size:.85rem}
+.spell .cost{font-family:var(--serif);font-weight:700;text-align:right;white-space:nowrap;font-size:.98rem}
+.spell .cost small{display:block;font-family:var(--sans);font-weight:400;color:var(--ink-3);font-size:.75rem}
+.mem-mark{display:inline-block;width:8px;height:8px;transform:rotate(45deg);background:var(--balance);margin-right:8px;vertical-align:2px}
+.al-Chaos .bar,.bar.al-Chaos{background:var(--chaos)} .al-Balance .bar,.bar.al-Balance{background:var(--balance)} .al-Loi .bar,.bar.al-Loi{background:var(--loi)}
+.empty{color:var(--ink-2);padding:30px 6px;text-align:center}
+
+.book{border-bottom:1px solid var(--line)}
+.book summary{list-style:none;cursor:pointer;padding:14px 0;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.book summary::-webkit-details-marker{display:none}
+.book .bt{font-family:var(--serif);font-weight:700;font-size:1.15rem}
+.book .bm{color:var(--ink-2);font-size:.88rem;text-align:right}
+.book[open] summary .bt::after{content:" ▾";color:var(--ink-3)}
+.book summary .bt::after{content:" ▸";color:var(--ink-3)}
+.tag{font-size:.75rem;border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--ink-3);margin-left:6px;vertical-align:1px}
+.tag.learn{border-color:var(--balance);color:var(--balance)}
+
+.tabs{display:flex;border-top:1px solid var(--line);background:var(--bg-2);position:sticky;bottom:0}
+.tabs button{flex:1;background:none;border:0;padding:12px 0 calc(12px + env(safe-area-inset-bottom));cursor:pointer;color:var(--ink-3);font-family:var(--serif);font-size:1rem}
+.tabs button[aria-selected="true"]{color:var(--ink);box-shadow:inset 0 2px 0 var(--balance)}
+
+/* detail sheet */
+.sheet{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:10;animation:fade .15s ease}
+.desk.player-only .sheet,.sheet.fixed{position:fixed}
+@media (max-width:860px){.sheet{position:fixed}}
+.sheet .card{background:var(--bg);width:100%;max-height:88%;overflow-y:auto;border-radius:18px 18px 0 0;border-top:3px solid var(--neutre);padding:18px 18px calc(24px + env(safe-area-inset-bottom));animation:up .2s ease}
+.sheet .card.al-Chaos{border-top-color:var(--chaos)} .sheet .card.al-Balance{border-top-color:var(--balance)} .sheet .card.al-Loi{border-top-color:var(--loi)}
+@keyframes up{from{transform:translateY(30px);opacity:.4}} @keyframes fade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){.sheet,.sheet .card{animation:none}}
+.card .x{float:right;background:none;border:0;font-size:1.6rem;line-height:1;color:var(--ink-3);cursor:pointer;padding:0 0 0 12px}
+.card h2{font-family:var(--serif);font-size:1.5rem;margin:0 0 2px;line-height:1.15}
+.card .kind{color:var(--ink-2);margin-bottom:14px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.facts div{background:var(--bg-2);padding:8px 10px}
+.facts dt{font-size:.75rem;color:var(--ink-3)}
+.facts dd{margin:0;font-family:var(--serif);font-weight:700}
+.incant{font-family:var(--serif);font-style:italic;color:var(--ink-2);border-left:2px solid var(--balance);padding:2px 0 2px 12px;margin:0 0 16px;white-space:pre-line}
+.effects{white-space:pre-line;margin:0 0 16px;line-height:1.55}
+.card h3{font-size:.85rem;color:var(--ink-3);font-weight:500;margin:14px 0 4px}
+.card p.small{margin:0;color:var(--ink-2);font-size:.95rem}
+.statusline{display:inline-block;font-size:.85rem;padding:2px 8px;border-radius:999px;background:var(--bg-3);margin-bottom:14px}
+.statusline.mem{background:var(--balance);color:#1c1922}
+.nodata{padding:40px 20px;text-align:center;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="desk" id="desk">
+  <div class="phone" id="phone">
+    <div class="app" id="app"></div>
+  </div>
+</div>
+
+<script>
+const MODE = "site";                 // "mj" (page du MJ) ou "site" (site des joueurs)
+const EMBEDDED_XLSX = "";
+const SITE_FILES = {};
+const LS_CUR = "grimoires.current", LS_PREV = "grimoires.previous", LS_GH = "grimoires.github", LS_ROUTE = "grimoires.lastRoute";
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s ?? "").replace(/Œ/g,"Oe").replace(/œ/g,"oe").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+const slug = s => norm(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const yes = v => /^(oui|o|yes|1|vrai|x)$/i.test(String(v ?? "").trim());
+const str = v => v == null ? "" : String(v).trim();
+const b64enc = s => { const b = new TextEncoder().encode(s); let x = ""; for (let i = 0; i < b.length; i += 0x8000) x += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(x); };
+const b64dec = s => new TextDecoder().decode(Uint8Array.from(atob(String(s).replace(/\s/g,"")), c => c.charCodeAt(0)));
+const isDesk = () => MODE === "mj" && $("#mj") && getComputedStyle($("#mj")).display !== "none";
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+/* ---------- parsing ---------- */
+function readSheet(wb, name){
+  const key = Object.keys(wb.Sheets).find(n => norm(n) === norm(name));
+  if (!key) return null;
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[key], {defval:null, raw:true});
+  // normalise headers: lowercase, accents removed, text before "(" kept
+  return rows.map(r => {
+    const o = {};
+    for (const [h,v] of Object.entries(r)) o[norm(h).replace(/\s*\(.*$/,"")] = typeof v === "string" ? v.trim() : v;
+    return o;
+  }).filter(o => Object.values(o).some(v => v !== null && v !== ""));
+}
+function parseType(t){
+  const m = /^\s*([^()]+?)\s*(?:\((.+)\))?\s*$/.exec(t || "");
+  return { alignment: m ? m[1] : "", form: m && m[2] ? m[2] : "" };
+}
+function parseWorkbook(wb){
+  const missing = ["Campagnes","PJ","Ouvrages","Contenu","Sorts","Grimoires"].filter(n => !readSheet(wb,n));
+  if (missing.length) throw new Error("Onglet(s) manquant(s) : " + missing.join(", "));
+  const campaigns = readSheet(wb,"Campagnes").filter(r => r.campagne).map(r => ({
+    name: str(r.campagne), id: str(r.identifiant) || slug(r.campagne), active: r.active == null ? true : yes(r.active)
+  }));
+  const pcs = readSheet(wb,"PJ").filter(r => r.pj).map(r => ({
+    campaign: str(r.campagne), name: str(r.pj), full: str(r["nom complet"]) || str(r.pj),
+    id: str(r.identifiant) || slug(r.pj), int: Number(r.int) || 0, active: r.actif == null ? true : yes(r.actif)
+  }));
+  const books = readSheet(wb,"Ouvrages").filter(r => r.ouvrage).map(r => ({
+    campaign: str(r.campagne), name: str(r.ouvrage), lang: str(r.langue),
+    mod: r.modificateur == null || r.modificateur === "" ? null : Number(r.modificateur),
+    revealed: yes(r.revele), notes: str(r.notes)
+  }));
+  const contents = readSheet(wb,"Contenu").filter(r => r.ouvrage && r.sort).map(r => ({ book: str(r.ouvrage), spell: str(r.sort), notes: str(r.notes) }));
+  const spells = readSheet(wb,"Sorts").filter(r => r.sort).map(r => {
+    const t = parseType(str(r["type de magie"]));
+    return { name: str(r.sort), cost: str(r.cout), type: str(r["type de magie"]), alignment: t.alignment, form: t.form,
+             ref: str(r["ref."] ?? r.ref), range: str(r.portee), effects: str(r.effets), origin: str(r["origine"]) };
+  });
+  const grimoires = readSheet(wb,"Grimoires").filter(r => r.pj && r.sort).map(r => ({
+    pc: str(r.pj), spell: str(r.sort), memory: norm(r.statut).includes("memoire"), incantation: str(r.incantation)
+  }));
+  return { campaigns, pcs, books, contents, spells, grimoires, importedAt: new Date().toISOString() };
+}
+
+/* ---------- model & checks ---------- */
+function buildModel(data){
+  const spellBy = new Map(data.spells.map(s => [norm(s.name), s]));
+  const issues = [];
+  const dup = (arr, f, label) => { const seen = new Set(); arr.forEach(x => { const k = norm(f(x)); if (seen.has(k)) issues.push(`${label} en double : « ${f(x)} »`); seen.add(k); }); };
+  dup(data.spells, s => s.name, "Sort");
+  dup(data.pcs, p => p.name, "PJ");
+  dup(data.campaigns, c => c.name, "Campagne");
+  dup(data.books, b => b.campaign + " / " + b.name, "Ouvrage");
+  const campNames = new Set(data.campaigns.map(c => norm(c.name)));
+  data.pcs.forEach(p => { if (!campNames.has(norm(p.campaign))) issues.push(`PJ ${p.name} : campagne « ${p.campaign} » inconnue`); });
+  data.books.forEach(b => { if (!campNames.has(norm(b.campaign))) issues.push(`Ouvrage ${b.name} : campagne « ${b.campaign} » inconnue`); });
+  const pcBy = new Map(data.pcs.map(p => [norm(p.name), p]));
+  data.grimoires.forEach(g => {
+    if (!pcBy.has(norm(g.pc))) issues.push(`Grimoires : PJ « ${g.pc} » inconnu`);
+    if (!spellBy.has(norm(g.spell))) issues.push(`Grimoires : sort « ${g.spell} » (${g.pc}) absent du catalogue`);
+  });
+  const bookNames = new Set(data.books.map(b => norm(b.name)));
+  data.contents.forEach(c => {
+    if (!bookNames.has(norm(c.book))) issues.push(`Contenu : ouvrage « ${c.book} » absent de l'onglet Ouvrages`);
+    if (!spellBy.has(norm(c.spell))) issues.push(`Contenu : sort « ${c.spell} » (${c.book}) absent du catalogue`);
+  });
+  data.books.forEach(b => { if (!data.contents.some(c => norm(c.book) === norm(b.name))) issues.push({info:true, text:`Ouvrage ${b.name} (${b.campaign}) : aucun sort dans Contenu`}); });
+  data.spells.forEach(s => { if (!s.type) issues.push({info:true, text:`Sort ${s.name} : type de magie vide`}); });
+  data.pcs.forEach(p => {
+    const mem = data.grimoires.filter(g => norm(g.pc) === norm(p.name) && g.memory).length;
+    if (p.int && mem > p.int) issues.push(`${p.name} : ${mem} sorts en mémoire pour une INT de ${p.int}`);
+  });
+  const ids = new Map(); data.pcs.forEach(p => { const k = norm(p.campaign)+"/"+p.id; if (ids.has(k)) issues.push(`Identifiant de lien « ${p.id} » utilisé deux fois dans ${p.campaign}`); ids.set(k,1); });
+  return { ...data, spellBy, pcBy, issues };
+}
+
+/* What a given campaign can see */
+function campaignView(M, campName){
+  const pcs = M.pcs.filter(p => norm(p.campaign) === norm(campName) && p.active);
+  const pcSet = new Set(pcs.map(p => norm(p.name)));
+  const books = M.books.filter(b => norm(b.campaign) === norm(campName) && b.revealed);
+  const bookSet = new Set(books.map(b => norm(b.name)));
+  const visible = new Set();
+  M.grimoires.forEach(g => { if (pcSet.has(norm(g.pc))) visible.add(norm(g.spell)); });
+  M.contents.forEach(c => { if (bookSet.has(norm(c.book))) visible.add(norm(c.spell)); });
+  return { pcs, books, visible };
+}
+
+/* ---------- what gets published: one file per active campaign ---------- */
+function publishedViews(M){
+  return M.campaigns.filter(c => c.active).map(c => {
+    const v = campaignView(M, c.name);
+    const pcN = new Set(v.pcs.map(p => norm(p.name)));
+    const bN = new Set(v.books.map(b => norm(b.name)));
+    return { id: c.id, name: c.name, data: {
+      campaigns: [{ name: c.name, id: c.id, active: true }],
+      pcs: v.pcs.map(({campaign,name,full,id,int}) => ({campaign,name,full,id,int,active:true})),
+      books: v.books.map(({campaign,name,lang,mod}) => ({campaign,name,lang,mod,revealed:true})),
+      contents: M.contents.filter(x => bN.has(norm(x.book))).map(({book,spell}) => ({book,spell})),
+      spells: M.spells.filter(s => v.visible.has(norm(s.name))),
+      grimoires: M.grimoires.filter(g => pcN.has(norm(g.pc)))
+    }};
+  });
+}
+function mergeViews(views){
+  const m = { campaigns:[], pcs:[], books:[], contents:[], spells:[], grimoires:[] }, sS = new Set(), sC = new Set();
+  views.forEach(({data:d}) => {
+    m.campaigns.push(...d.campaigns); m.pcs.push(...d.pcs); m.books.push(...d.books); m.grimoires.push(...d.grimoires);
+    d.spells.forEach(s => { const k = norm(s.name); if (!sS.has(k)) { sS.add(k); m.spells.push(s); } });
+    d.contents.forEach(c => { const k = norm(c.book)+"|"+norm(c.spell); if (!sC.has(k)) { sC.add(k); m.contents.push(c); } });
+  });
+  return m;
+}
+
+/* ---------- diff (on what players see) ---------- */
+function diff(prev, cur){
+  if (!prev) return null;
+  if (!prev.campaigns.length) return `<p>Première publication : ${cur.campaigns.length} campagne(s), ${cur.pcs.length} PJ, ${cur.spells.length} sorts visibles.</p>`;
+  const out = [];
+  const camps = new Set([...prev.campaigns, ...cur.campaigns].map(c => c.name));
+  const keyG = g => norm(g.pc)+"|"+norm(g.spell);
+  const pg = new Map(prev.grimoires.map(g => [keyG(g), g])), cg = new Map(cur.grimoires.map(g => [keyG(g), g]));
+  const campOfPc = (d, pc) => (d.pcs.find(p => norm(p.name) === norm(pc)) || {}).campaign || "?";
+  for (const camp of camps){
+    const items = [];
+    const inCamp = (d, pc) => norm(campOfPc(d, pc)) === norm(camp);
+    const inP = prev.campaigns.some(c => norm(c.name) === norm(camp)), inC = cur.campaigns.some(c => norm(c.name) === norm(camp));
+    if (!inC){ out.push(`<h3>${esc(camp)}</h3><ul><li class="del">Campagne retirée du site</li></ul>`); continue; }
+    if (!inP){ out.push(`<h3>${esc(camp)}</h3><ul><li class="add">Nouvelle campagne publiée (${cur.pcs.filter(p => norm(p.campaign)===norm(camp)).length} PJ)</li></ul>`); continue; }
+    for (const [k,g] of cg) if (inCamp(cur,g.pc)) {
+      const o = pg.get(k);
+      if (!o) items.push(`<li class="add">${esc(g.pc)} apprend ${esc(g.spell)}${g.memory ? " (en mémoire)" : ""}</li>`);
+      else {
+        if (o.memory !== g.memory) items.push(`<li>${esc(g.pc)} : ${esc(g.spell)} ${g.memory ? "passe en mémoire" : "sort de la mémoire"}</li>`);
+        if (o.incantation !== g.incantation) items.push(`<li>${esc(g.pc)} : incantation de ${esc(g.spell)} modifiée</li>`);
+      }
+    }
+    for (const [k,g] of pg) if (!cg.has(k) && inCamp(prev,g.pc)) items.push(`<li class="del">${esc(g.pc)} perd ${esc(g.spell)}</li>`);
+    const pb = new Map(prev.books.filter(b => norm(b.campaign)===norm(camp)).map(b => [norm(b.name), b]));
+    cur.books.filter(b => norm(b.campaign)===norm(camp)).forEach(b => {
+      const o = pb.get(norm(b.name));
+      if (!o) items.push(`<li class="add">Ouvrage révélé : ${esc(b.name)}</li>`);
+      else if (o.lang !== b.lang || o.mod !== b.mod) items.push(`<li>${esc(b.name)} : langue ou modificateur modifié</li>`);
+    });
+    pb.forEach((b,k) => { if (!cur.books.some(x => norm(x.campaign)===norm(camp) && norm(x.name)===k)) items.push(`<li class="del">Ouvrage caché ou retiré : ${esc(b.name)}</li>`); });
+    const pp = new Set(prev.pcs.filter(p=>norm(p.campaign)===norm(camp)).map(p=>norm(p.name)));
+    cur.pcs.filter(p=>norm(p.campaign)===norm(camp)).forEach(p => { if (!pp.has(norm(p.name))) items.push(`<li class="add">Nouveau PJ : ${esc(p.name)}</li>`); });
+    prev.pcs.filter(p=>norm(p.campaign)===norm(camp)).forEach(p => { if (!cur.pcs.some(x => norm(x.name)===norm(p.name))) items.push(`<li class="del">PJ retiré : ${esc(p.name)}</li>`); });
+    const pPc = new Map(prev.pcs.map(p => [norm(p.name), p]));
+    cur.pcs.filter(p=>norm(p.campaign)===norm(camp)).forEach(p => { const o = pPc.get(norm(p.name)); if (o && (o.int !== p.int || o.full !== p.full || o.id !== p.id)) items.push(`<li>${esc(p.name)} : fiche modifiée (nom, INT ou lien)</li>`); });
+    if (items.length) out.push(`<h3>${esc(camp)}</h3><ul>${items.join("")}</ul>`);
+  }
+  const ps = new Map(prev.spells.map(s => [norm(s.name), s]));
+  const cat = [];
+  cur.spells.forEach(s => {
+    const o = ps.get(norm(s.name));
+    if (!o) { cat.push(`<li class="add">Nouveau sort visible : ${esc(s.name)}</li>`); return; }
+    const f = ["cost","type","ref","range","effects","origin"].filter(k => o[k] !== s[k]);
+    const lbl = {cost:"coût",type:"type",ref:"réf.",range:"portée",effects:"effets",origin:"origine"};
+    if (f.length) cat.push(`<li>${esc(s.name)} : ${f.map(k=>lbl[k]).join(", ")}</li>`);
+  });
+  prev.spells.forEach(s => { if (!cur.spells.some(c => norm(c.name)===norm(s.name))) cat.push(`<li class="del">Sort plus visible : ${esc(s.name)}</li>`); });
+  if (cat.length) out.push(`<h3>Sorts</h3><ul>${cat.join("")}</ul>`);
+  return out.join("") || `<p class="muted">Aucun changement.</p>`;
+}
+
+/* ---------- state ---------- */
+let M = null, DIFF = null;
+const ui = { tab:"grimoire", q:"", mem:false, al:new Set(), form:new Set() };
+
+function route(){
+  const [c, p] = location.hash.replace(/^#\/?/,"").split("/").map(decodeURIComponent);
+  return { c, p };
+}
+function current(){
+  if (!M) return {};
+  const r = route();
+  let camp = M.campaigns.find(x => x.id === r.c) || M.campaigns.find(x => x.active) || M.campaigns[0];
+  if (!camp) return {};
+  const view = campaignView(M, camp.name);
+  let pc = view.pcs.find(p => p.id === r.p) || view.pcs[0];
+  return { camp, view, pc };
+}
+
+/* ---------- MJ panel ---------- */
+function renderMJ(){
+  if (!M) return;
+  $("#links").innerHTML = M.campaigns.map(c => {
+    const pcs = M.pcs.filter(p => norm(p.campaign) === norm(c.name));
+    const cur = current();
+    return `<div class="camp-name">${esc(c.name)}${c.active ? "" : ' <span class="muted">(inactive)</span>'}</div>
+      <ul class="links">${pcs.map(p => `<li class="${cur.pc && cur.pc.name===p.name ? "cur":""}"><a href="#${encodeURIComponent(c.id)}/${encodeURIComponent(p.id)}">${esc(p.name)}${p.active?"":' <span class="muted">(inactif)</span>'}</a><span>${GH.ready() ? `<code>${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}</code><button class="copy" data-copy="${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}">copier</button>` : `<code>…/#${esc(c.id)}/${esc(p.id)}</code>`}</span></li>`).join("") || '<li class="muted">Aucun PJ</li>'}</ul>`;
+  }).join("");
+  $("#issues").innerHTML = M.issues.length
+    ? M.issues.map(i => typeof i === "string" ? `<li>${esc(i)}</li>` : `<li class="info">${esc(i.text)}</li>`).join("")
+    : `<li class="ok">Rien à signaler.</li>`;
+  $("#diffTitle").textContent = DIFF_BASE === "online" ? "Changements par rapport au site" : "Changements depuis l'import précédent";
+  $("#diff").innerHTML = DIFF || `<p class="muted">${GH.ready() ? "Comparaison avec le site en cours…" : "Importe une nouvelle version du fichier pour voir ce qui a changé."}</p>`;
+  document.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "copié"; setTimeout(() => b.textContent = "copier", 1500); } catch {} });
+  renderPub();
+}
+
+/* ---------- GitHub ---------- */
+const GH = {
+  cfg(){ return store.get(LS_GH) || { owner:"", repo:"grimoires", token:"" }; },
+  ready(){ const c = this.cfg(); return !!(c.owner && c.repo && c.token); },
+  siteUrl(){ const c = this.cfg(); return `https://${c.owner.toLowerCase()}.github.io/${c.repo}/`; },
+  async api(path, opts = {}){
+    const c = this.cfg();
+    const res = await fetch(`https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}${path}`, {
+      method: opts.method || "GET", cache: "no-store", body: opts.body,
+      headers: { "Accept":"application/vnd.github+json", "Authorization":`Bearer ${c.token}`, "X-GitHub-Api-Version":"2022-11-28" } });
+    if (res.status === 404 && opts.allow404) return null;
+    if (!res.ok){ let m = ""; try { m = (await res.json()).message; } catch {} const e = new Error(`GitHub ${res.status}${m ? " : " + m : ""}`); e.status = res.status; throw e; }
+    return res.status === 204 ? null : res.json();
+  },
+  async get(path){ const j = await this.api(`/contents/${path}`, {allow404:true}); return j && !Array.isArray(j) ? { sha: j.sha, text: b64dec(j.content || "") } : null; },
+  async list(dir){ const j = await this.api(`/contents/${dir}`, {allow404:true}); return Array.isArray(j) ? j : []; },
+  put(path, text, sha, message){ return this.api(`/contents/${path}`, { method:"PUT", body: JSON.stringify({ message, content: b64enc(text), ...(sha ? {sha} : {}) }) }); },
+  del(path, sha, message){ return this.api(`/contents/${path}`, { method:"DELETE", body: JSON.stringify({ message, sha }) }); }
+};
+let ONLINE = null, DIFF_BASE = null, PUB_MSG = "", PUB_CLS = "", BUSY = false;
+const ghError = e => e.status === 401 ? "Clé de publication refusée (expirée ou mal copiée)."
+  : e.status === 403 ? "La clé n'a pas les droits nécessaires sur ce dépôt (Contents : Read and write)."
+  : e.status === 404 ? "Dépôt introuvable : vérifie le nom d'utilisateur, le nom du dépôt, et que la clé y a accès."
+  : /fetch/i.test(e.message) ? "Impossible de joindre GitHub : vérifie la connexion internet." : e.message;
+function setMsg(m, cls = ""){ PUB_MSG = m; PUB_CLS = cls; renderPub(); }
+
+async function fetchOnline(){
+  const files = (await GH.list("data")).filter(f => f.name.endsWith(".json"));
+  const views = [];
+  for (const f of files){
+    const g = await GH.get(`data/${f.name}`);
+    try { views.push({ id: f.name.replace(/\.json$/, ""), sha: g.sha, text: g.text, data: JSON.parse(g.text) }); } catch {}
+  }
+  return views;
+}
+async function refreshOnline(){
+  if (!GH.ready() || !M) return;
+  try {
+    ONLINE = await fetchOnline();
+    DIFF_BASE = "online";
+    DIFF = diff(mergeViews(ONLINE), mergeViews(publishedViews(M)));
+    if (PUB_CLS === "err") setMsg("");
+  } catch(e){ ONLINE = null; setMsg(ghError(e), "err"); }
+  renderMJ();
+}
+async function publish(){
+  const blocking = M.issues.filter(i => typeof i === "string");
+  if (blocking.length && !confirm(`${blocking.length} point(s) à vérifier dans les contrôles. Publier quand même ?`)) return;
+  BUSY = true; setMsg("Publication en cours…");
+  try {
+    const cur = publishedViews(M), online = await fetchOnline();
+    let n = 0;
+    for (const v of cur){
+      const text = JSON.stringify(v.data), o = online.find(x => x.id === v.id);
+      if (o && o.text === text) continue;
+      await GH.put(`data/${v.id}.json`, text, o && o.sha, `Grimoires : ${v.name}`); n++;
+    }
+    for (const o of online) if (!cur.some(v => v.id === o.id)){ await GH.del(`data/${o.id}.json`, o.sha, `Retrait de la campagne ${o.id}`); n++; }
+    BUSY = false;
+    setMsg(n ? `Publié à ${new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}. Les joueurs verront les changements d'ici une minute environ, en rechargeant la page.` : "Rien à publier : le site est déjà à jour.", "ok");
+    await refreshOnline();
+  } catch(e){ BUSY = false; setMsg(ghError(e), "err"); }
+}
+async function installSite(){
+  BUSY = true; setMsg("Installation du site…");
+  try {
+    let n = 0;
+    for (const [path, text] of Object.entries(SITE_FILES)){
+      const o = await GH.get(path);
+      if (o && o.text === text) continue;
+      await GH.put(path, text, o && o.sha, `Site : ${path}`); n++;
+    }
+    const repo = await GH.api("");
+    let pages = await GH.api("/pages", {allow404:true});
+    if (!pages){
+      try { pages = await GH.api("/pages", { method:"POST", body: JSON.stringify({ source: { branch: repo.default_branch || "main", path: "/" } }) }); }
+      catch(e){ BUSY = false; setMsg(`Fichiers du site en place. Il reste à activer la publication : dans GitHub, Settings → Pages → Branch « ${repo.default_branch || "main"} » → Save.`, "err"); return; }
+    }
+    BUSY = false;
+    setMsg(`${n ? "Site installé" : "Site déjà à jour"}. Adresse : ${GH.siteUrl()} (la première mise en ligne peut prendre quelques minutes).`, "ok");
+  } catch(e){ BUSY = false; setMsg(ghError(e), "err"); }
+}
+function renderPub(){
+  const box = $("#pub"); if (!box) return;
+  const c = GH.cfg();
+  if (!GH.ready() || box.dataset.edit === "1"){
+    box.innerHTML = `<div class="form">
+      <label>Nom d'utilisateur GitHub<input id="ghOwner" value="${esc(c.owner)}" autocomplete="off" spellcheck="false"></label>
+      <label>Nom du dépôt<input id="ghRepo" value="${esc(c.repo || "grimoires")}" autocomplete="off" spellcheck="false"></label>
+      <label>Clé de publication<input id="ghToken" type="password" value="${esc(c.token)}" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+      <div class="row"><button class="btn primary" id="ghSave">Enregistrer et tester</button>${GH.ready() ? '<button class="btn" id="ghCancel">Annuler</button>' : ""}</div>
+      <p class="muted" style="margin:0;font-size:.88rem">La clé reste dans ce navigateur, sur ce PC. Elle n'est envoyée qu'à GitHub.</p>
+    </div><div class="msg ${PUB_CLS}">${esc(PUB_MSG)}</div>`;
+    $("#ghSave").onclick = async () => {
+      const cfg = { owner: $("#ghOwner").value.trim(), repo: $("#ghRepo").value.trim() || "grimoires", token: $("#ghToken").value.trim() };
+      if (!cfg.owner || !cfg.token) return setMsg("Renseigne le nom d'utilisateur et la clé.", "err");
+      store.set(LS_GH, cfg);
+      try { await GH.api(""); delete box.dataset.edit; setMsg("Connexion à GitHub réussie.", "ok"); await refreshOnline(); }
+      catch(e){ box.dataset.edit = "1"; setMsg(ghError(e), "err"); }
+    };
+    const cc = $("#ghCancel"); if (cc) cc.onclick = () => { delete box.dataset.edit; renderPub(); };
+    return;
+  }
+  box.innerHTML = `<p class="pubinfo">Dépôt <strong>${esc(c.owner)}/${esc(c.repo)}</strong>, site <a href="${esc(GH.siteUrl())}" target="_blank" rel="noopener">${esc(GH.siteUrl())}</a></p>
+    <div class="row">
+      <button class="btn primary" id="ghPublish" ${BUSY || !M ? "disabled" : ""}>Publier</button>
+      <button class="btn" id="ghRefresh" ${BUSY ? "disabled" : ""}>Comparer avec le site</button>
+      <button class="btn" id="ghInstall" ${BUSY ? "disabled" : ""}>Installer / mettre à jour le site</button>
+      <button class="btn" id="ghEdit" ${BUSY ? "disabled" : ""}>Réglages</button>
+    </div><div class="msg ${PUB_CLS}">${esc(PUB_MSG)}</div>`;
+  $("#ghPublish").onclick = publish;
+  $("#ghRefresh").onclick = () => { setMsg(""); refreshOnline(); };
+  $("#ghInstall").onclick = installSite;
+  $("#ghEdit").onclick = () => { box.dataset.edit = "1"; setMsg(""); };
+}
+
+/* ---------- player view ---------- */
+function slots(n, int){
+  if (!int) return "";
+  const total = Math.max(n, int);
+  let h = "";
+  for (let i = 0; i < total; i++) h += `<span class="slot ${i < n ? (i >= int ? "over" : "on") : ""}"></span>`;
+  return `<div class="slots" title="${n} sorts en mémoire sur ${int}">${h}<span class="slots-label ${n>int?"over":""}">${n} / ${int} en mémoire</span></div>`;
+}
+function spellRow(s, g, extra=""){
+  const al = esc(s.alignment);
+  return `<button class="spell al-${al}" data-spell="${esc(s.name)}">
+    <span class="bar"></span>
+    <span><span class="nm">${g && g.memory ? '<span class="mem-mark" title="En mémoire"></span>' : ""}${esc(s.name)}</span>${extra}
+      <span class="meta">${esc([s.type, s.range].filter(Boolean).join(" · "))}</span></span>
+    <span class="cost">${esc(s.cost || "—")}<small>${s.cost ? "PM" : ""}</small></span>
+  </button>`;
+}
+function renderApp(keepScroll){
+  const app = $("#app");
+  if (!M){ app.innerHTML = `<div class="nodata">${MODE === "site" ? "Chargement…" : "Aucune donnée. Importe « Sorts du groupe.xlsx »."}</div>`; return; }
+  const { camp, view, pc } = current();
+  if (!camp){ app.innerHTML = `<div class="nodata">Aucune campagne dans le fichier.</div>`; return; }
+  const sc = app.querySelector(".scroll"); const st = keepScroll && sc ? sc.scrollTop : 0;
+  const mine = pc ? M.grimoires.filter(g => norm(g.pc) === norm(pc.name)) : [];
+  const memN = mine.filter(g => g.memory).length;
+  let body = "";
+  if (!pc) body = `<div class="nodata">Pas encore de PJ dans cette campagne.</div>`;
+  else if (ui.tab === "grimoire") body = renderGrimoire(mine);
+  else body = renderLibrary(view, mine);
+  app.innerHTML = `
+    <div class="scroll">
+      <header class="head">
+        <div class="top"><span class="camp">${esc(camp.name)}</span>
+          <span class="who"><select id="pcSel" aria-label="Changer de personnage">${view.pcs.map(p => `<option value="${esc(p.id)}" ${pc && p.id===pc.id?"selected":""}>${esc(p.name)}</option>`).join("")}</select></span></div>
+        <div class="pj">${esc(pc ? pc.full : "—")}</div>
+        ${pc ? slots(memN, pc.int) : ""}
+      </header>
+      ${body}
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="grimoire" aria-selected="${ui.tab==="grimoire"}">Grimoire${pc ? ` <span class="muted">${mine.length}</span>` : ""}</button>
+      <button role="tab" data-tab="biblio" aria-selected="${ui.tab==="biblio"}">Bibliothèque <span class="muted">${view.books.length}</span></button>
+    </nav>`;
+  if (keepScroll) app.querySelector(".scroll").scrollTop = st;
+  bindApp();
+}
+function renderGrimoire(mine){
+  const entries = mine.map(g => ({ g, s: M.spellBy.get(norm(g.spell)) || { name: g.spell, type:"", alignment:"", form:"", cost:"", range:"", effects:"" } }));
+  const als = [...new Set(entries.map(e => e.s.alignment).filter(Boolean))].sort();
+  const forms = [...new Set(entries.map(e => e.s.form).filter(Boolean))].sort();
+  const q = norm(ui.q);
+  const shown = entries.filter(({g,s}) =>
+    (!ui.mem || g.memory) &&
+    (!ui.al.size || ui.al.has(s.alignment)) &&
+    (!ui.form.size || ui.form.has(s.form)) &&
+    (!q || norm(s.name + " " + s.effects + " " + g.incantation).includes(q))
+  ).sort((a,b) => norm(a.s.name).localeCompare(norm(b.s.name)));
+  let rows = "", last = "";
+  shown.forEach(({g,s}) => {
+    const L = norm(s.name).charAt(0).toUpperCase();
+    if (L !== last){ rows += `<div class="letter">${L}</div>`; last = L; }
+    rows += spellRow(s, g);
+  });
+  return `
+    <div class="tools">
+      <input class="search" id="q" type="search" placeholder="Chercher un sort, un effet…" value="${esc(ui.q)}" autocomplete="off">
+      <div class="chips">
+        <button class="chip" data-mem aria-pressed="${ui.mem}">En mémoire</button>
+        ${als.map(a => `<button class="chip al-${esc(a)}" data-al="${esc(a)}" aria-pressed="${ui.al.has(a)}">${esc(a)}</button>`).join("")}
+        ${forms.map(f => `<button class="chip" data-form="${esc(f)}" aria-pressed="${ui.form.has(f)}">${esc(f)}</button>`).join("")}
+      </div>
+    </div>
+    <div class="list">${rows || `<div class="empty">Aucun sort ne correspond.${ui.q||ui.mem||ui.al.size||ui.form.size ? ' <button class="btn" id="reset">Effacer les filtres</button>':''}</div>`}</div>`;
+}
+function renderLibrary(view, mine){
+  const known = new Set(mine.map(g => norm(g.spell)));
+  if (!view.books.length) return `<div class="list"><div class="empty">Le groupe n'a encore trouvé aucun ouvrage.</div></div>`;
+  return `<div class="list">${view.books.map(b => {
+    const sp = M.contents.filter(c => norm(c.book) === norm(b.name)).map(c => M.spellBy.get(norm(c.spell))).filter(Boolean)
+      .sort((a,b2) => norm(a.name).localeCompare(norm(b2.name)));
+    const toLearn = sp.filter(s => !known.has(norm(s.name))).length;
+    const mod = b.mod == null ? "" : (b.mod > 0 ? "+" + b.mod : b.mod === 0 ? "±0" : String(b.mod));
+    return `<details class="book">
+      <summary><span class="bt">${esc(b.name)}</span>
+        <span class="bm">${esc([b.lang, mod && "mod. " + mod].filter(Boolean).join(", "))}<br>${sp.length} sorts, ${toLearn} à apprendre</span></summary>
+      ${sp.map(s => spellRow(s, mine.find(g => norm(g.spell)===norm(s.name)), known.has(norm(s.name)) ? ' <span class="tag">connu</span>' : ' <span class="tag learn">à apprendre</span>')).join("")}
+    </details>`;
+  }).join("")}</div>`;
+}
+function openSpell(name){
+  const { view, pc } = current();
+  const s = M.spellBy.get(norm(name)); if (!s) return;
+  const g = pc && M.grimoires.find(x => norm(x.pc)===norm(pc.name) && norm(x.spell)===norm(name));
+  const books = view.books.filter(b => M.contents.some(c => norm(c.book)===norm(b.name) && norm(c.spell)===norm(name)));
+  const mod = m => m == null ? "" : (m > 0 ? "+" + m : m === 0 ? "±0" : String(m));
+  const sheet = document.createElement("div");
+  sheet.className = "sheet" + (isDesk() ? "" : " fixed");
+  sheet.innerHTML = `<div class="card al-${esc(s.alignment)}" role="dialog" aria-modal="true" aria-label="${esc(s.name)}">
+    <button class="x" aria-label="Fermer">×</button>
+    <h2>${esc(s.name)}</h2>
+    <div class="kind">${esc(s.type || "Type non renseigné")}</div>
+    ${g ? `<span class="statusline ${g.memory?"mem":""}">${g.memory ? "En mémoire" : "Connu, à consulter dans le grimoire"}</span>` : pc ? `<span class="statusline">Pas dans le grimoire de ${esc(pc.name)}</span>` : ""}
+    <dl class="facts">
+      <div><dt>Coût</dt><dd>${esc(s.cost || "—")}${s.cost ? " PM" : ""}</dd></div>
+      <div><dt>Portée</dt><dd>${esc(s.range || "—")}</dd></div>
+      <div><dt>Réf.</dt><dd>${esc(s.ref || "—")}</dd></div>
+    </dl>
+    ${g && g.incantation ? `<p class="incant">${esc(g.incantation)}</p>` : ""}
+    <p class="effects">${esc(s.effects || "Pas de description.")}</p>
+    ${books.length ? `<h3>Se trouve dans</h3><p class="small">${books.map(b => esc(b.name) + (b.lang||b.mod!=null ? ` (${esc([b.lang, b.mod!=null ? "mod. "+mod(b.mod) : ""].filter(Boolean).join(", "))})` : "")).join("<br>")}</p>`
+      : s.origin ? `<h3>Origine</h3><p class="small">${esc(s.origin)}</p>` : ""}
+  </div>`;
+  const host = isDesk() ? $("#phone") : document.body;
+  host.appendChild(sheet);
+  const close = () => { sheet.remove(); document.removeEventListener("keydown", onKey); };
+  const onKey = e => { if (e.key === "Escape") close(); };
+  document.addEventListener("keydown", onKey);
+  sheet.addEventListener("click", e => { if (e.target === sheet || e.target.closest(".x")) close(); });
+  sheet.querySelector(".x").focus();
+}
+function bindApp(){
+  const app = $("#app");
+  const sel = app.querySelector("#pcSel");
+  if (sel) sel.onchange = () => { const { camp } = current(); location.hash = `${camp.id}/${sel.value}`; };
+  app.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { ui.tab = b.dataset.tab; renderApp(); });
+  const q = app.querySelector("#q");
+  if (q) q.oninput = () => { ui.q = q.value; const pos = q.selectionStart; renderApp(true); const nq = $("#app #q"); nq.focus(); nq.setSelectionRange(pos,pos); };
+  app.querySelectorAll("[data-mem]").forEach(b => b.onclick = () => { ui.mem = !ui.mem; renderApp(true); });
+  app.querySelectorAll("[data-al]").forEach(b => b.onclick = () => { const v=b.dataset.al; ui.al.has(v)?ui.al.delete(v):ui.al.add(v); renderApp(true); });
+  app.querySelectorAll("[data-form]").forEach(b => b.onclick = () => { const v=b.dataset.form; ui.form.has(v)?ui.form.delete(v):ui.form.add(v); renderApp(true); });
+  const r = app.querySelector("#reset"); if (r) r.onclick = () => { ui.q=""; ui.mem=false; ui.al.clear(); ui.form.clear(); renderApp(); };
+  app.querySelectorAll("[data-spell]").forEach(b => b.onclick = () => openSpell(b.dataset.spell));
+}
+
+/* ---------- loading (MJ) ---------- */
+function load(data, {fromFile} = {}){
+  const prev = store.get(LS_CUR);
+  if (fromFile){ if (prev) store.set(LS_PREV, prev); store.set(LS_CUR, data); }
+  const p = fromFile ? prev : store.get(LS_PREV);
+  M = buildModel(data);
+  if (GH.ready()){ DIFF = null; DIFF_BASE = "online"; refreshOnline(); }
+  else { DIFF_BASE = "import"; DIFF = p ? diff(mergeViews(publishedViews(buildModel(p))), mergeViews(publishedViews(M))) : null; }
+  const n = M.issues.filter(i => typeof i === "string").length;
+  $("#status").innerHTML = `${fromFile ? "Importé" : "Chargé"} : ${data.spells.length} sorts, ${data.pcs.length} PJ, ${data.campaigns.length} campagne(s), ${data.books.length} ouvrage(s). ` +
+    (n ? `<strong style="color:var(--warn)">${n} point(s) à vérifier.</strong>` : "Aucune anomalie.");
+  renderMJ(); renderApp();
+}
+function readFile(file){
+  const r = new FileReader();
+  r.onload = () => {
+    try { load(parseWorkbook(XLSX.read(r.result, {type:"array"})), {fromFile:true}); }
+    catch(e){ $("#status").innerHTML = `<strong style="color:var(--warn)">Import impossible :</strong> ${esc(e.message)}`; }
+  };
+  r.readAsArrayBuffer(file);
+}
+function initMJ(){
+  if (new URLSearchParams(location.search).has("joueur")) $("#desk").classList.add("player-only");
+  const drop = $("#drop");
+  $("#file").onchange = e => e.target.files[0] && readFile(e.target.files[0]);
+  ["dragenter","dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave","drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => e.dataTransfer.files[0] && readFile(e.dataTransfer.files[0]));
+  window.addEventListener("hashchange", () => { ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=false; renderMJ(); renderApp(); });
+  renderPub();
+  if (typeof XLSX === "undefined"){ $("#status").textContent = "Le lecteur de fichiers Excel ne s’est pas chargé."; renderApp(); return; }
+  const saved = store.get(LS_CUR);
+  if (saved) load(saved);
+  else if (EMBEDDED_XLSX.length > 20){
+    const bin = Uint8Array.from(atob(EMBEDDED_XLSX), c => c.charCodeAt(0));
+    const data = parseWorkbook(XLSX.read(bin, {type:"array"}));
+    store.set(LS_CUR, data);
+    load(data);
+  } else renderApp();
+}
+
+/* ---------- loading (site joueurs) ---------- */
+let LOADED = null;
+async function loadCampaign(id){
+  let data = null;
+  try {
+    const res = await fetch(`data/${encodeURIComponent(id)}.json`, { cache: "no-cache" });
+    if (res.ok){ data = await res.json(); store.set("grimoires.data." + id, data); }
+  } catch {}
+  if (!data) data = store.get("grimoires.data." + id);
+  LOADED = id;
+  M = data ? buildModel(data) : null;
+  if (!M){ $("#app").innerHTML = `<div class="nodata">Ce lien ne correspond à aucune campagne publiée. Vérifie-le auprès de ton MJ.</div>`; return; }
+  renderApp();
+}
+function initSite(){
+  $("#desk").classList.add("player-only");
+  if (!location.hash.replace(/^#\/?/,"")){ const last = store.get(LS_ROUTE); if (last) history.replaceState(null, "", "#" + last); }
+  const go = () => {
+    const r = route();
+    if (!r.c){ $("#app").innerHTML = `<div class="nodata">Ouvre le lien personnel que ton MJ t'a envoyé.</div>`; return; }
+    store.set(LS_ROUTE, location.hash.replace(/^#\/?/,""));
+    if (r.c !== LOADED) loadCampaign(r.c); else renderApp();
+  };
+  window.addEventListener("hashchange", () => { ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=false; go(); });
+  go();
+  if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+function init(){ MODE === "site" ? initSite() : initMJ(); }
+init();
+</script>
+</body>
+</html>
