@@ -105,7 +105,6 @@ button,input,select{font:inherit;color:inherit}
 .head{padding:18px 16px 12px;background:linear-gradient(var(--bg-2),var(--bg));border-bottom:1px solid var(--line)}
 .head .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .camp{color:var(--ink-3);font-size:.85rem}
-.who select{background:var(--bg-3);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:.9rem}
 .pj{font-family:var(--display);font-size:2.1rem;line-height:1.05;margin:8px 0 10px;letter-spacing:.01em}
 .slots{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
 .slot{width:11px;height:11px;border:1.5px solid var(--ink-3);transform:rotate(45deg);border-radius:1px}
@@ -117,13 +116,19 @@ button,input,select{font:inherit;color:inherit}
 .tools{padding:12px 16px 4px;position:sticky;top:0;background:var(--bg);z-index:2}
 .search{width:100%;background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .search::placeholder{color:var(--ink-3)}
-.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 8px;scrollbar-width:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0 8px}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:transparent;cursor:pointer;font-size:.9rem;color:var(--ink-2)}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:10px;background:var(--bg-2)}
+.seg button{border:0;background:none;padding:11px 6px;cursor:pointer;font-family:var(--serif);font-size:1.05rem;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--balance);color:var(--bg);font-weight:700}
+.seg .n{font-family:var(--sans);font-weight:400;font-size:.85rem;opacity:.8;margin-left:4px}
+.chips .sep{flex:none;width:1px;background:var(--line);margin:3px 2px}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .chip.al-Chaos[aria-pressed="true"]{background:var(--chaos);border-color:var(--chaos);color:#fff}
-.chip.al-Balance[aria-pressed="true"]{background:var(--balance);border-color:var(--balance);color:#1c1922}
-.chip.al-Loi[aria-pressed="true"]{background:var(--loi);border-color:var(--loi);color:#1c1922}
+.chip.al-Balance[aria-pressed="true"]{background:var(--balance);border-color:var(--balance);color:var(--bg)}
+.chip.al-Loi[aria-pressed="true"]{background:var(--loi);border-color:var(--loi);color:var(--bg)}
 
 .list{padding:0 16px 24px}
 .letter{font-family:var(--display);color:var(--ink-3);font-size:1.15rem;margin:14px 0 2px;border-bottom:1px solid var(--line);padding-bottom:2px}
@@ -173,6 +178,12 @@ button,input,select{font:inherit;color:inherit}
 .card p.small{margin:0;color:var(--ink-2);font-size:.95rem}
 .statusline{display:inline-block;font-size:.85rem;padding:2px 8px;border-radius:999px;background:var(--bg-3);margin-bottom:14px}
 .statusline.mem{background:var(--balance);color:#1c1922}
+.statusline.learn{background:transparent;border:1px dashed var(--loi);color:var(--loi)}
+.learning{margin:6px 0 4px;border:1px dashed var(--loi);border-radius:12px;padding:4px 12px 2px}
+.learning h3{font-family:var(--serif);font-size:.95rem;font-weight:500;color:var(--loi);margin:6px 0 0}
+.learning .spell:last-child{border-bottom:0}
+.prog{display:block;color:var(--loi);font-size:.85rem}
+.tag.learning-tag{border-color:var(--loi);color:var(--loi);border-style:dashed}
 .nodata{padding:40px 20px;text-align:center;color:var(--ink-2)}
 </style>
 </head>
@@ -242,7 +253,8 @@ function parseWorkbook(wb){
              ref: str(r["ref."] ?? r.ref), range: str(r.portee), effects: str(r.effets), origin: str(r["origine"]) };
   });
   const grimoires = readSheet(wb,"Grimoires").filter(r => r.pj && r.sort).map(r => ({
-    pc: str(r.pj), spell: str(r.sort), memory: norm(r.statut).includes("memoire"), incantation: str(r.incantation)
+    pc: str(r.pj), spell: str(r.sort), memory: norm(r.statut).includes("memoire"), learning: norm(r.statut).includes("apprentissage"),
+    progress: str(r.progression), incantation: str(r.incantation)
   }));
   return { campaigns, pcs, books, contents, spells, grimoires, importedAt: new Date().toISOString() };
 }
@@ -275,6 +287,7 @@ function buildModel(data){
     const mem = data.grimoires.filter(g => norm(g.pc) === norm(p.name) && g.memory).length;
     if (p.int && mem > p.int) issues.push(`${p.name} : ${mem} sorts en mémoire pour une INT de ${p.int}`);
   });
+  data.grimoires.forEach(g => { if (g.progress && !g.learning) issues.push({info:true, text:`${g.pc} : progression renseignée sur ${g.spell}, qui n'est pas en apprentissage`}); });
   const ids = new Map(); data.pcs.forEach(p => { const k = norm(p.campaign)+"/"+p.id; if (ids.has(k)) issues.push(`Identifiant de lien « ${p.id} » utilisé deux fois dans ${p.campaign}`); ids.set(k,1); });
   return { ...data, spellBy, pcBy, issues };
 }
@@ -318,6 +331,7 @@ function mergeViews(views){
 }
 
 /* ---------- diff (on what players see) ---------- */
+const ws = v => String(v ?? "").replace(/\s+/g," ").trim();
 function diff(prev, cur){
   if (!prev) return null;
   if (!prev.campaigns.length) return `<p>Première publication : ${cur.campaigns.length} campagne(s), ${cur.pcs.length} PJ, ${cur.spells.length} sorts visibles.</p>`;
@@ -334,10 +348,12 @@ function diff(prev, cur){
     if (!inP){ out.push(`<h3>${esc(camp)}</h3><ul><li class="add">Nouvelle campagne publiée (${cur.pcs.filter(p => norm(p.campaign)===norm(camp)).length} PJ)</li></ul>`); continue; }
     for (const [k,g] of cg) if (inCamp(cur,g.pc)) {
       const o = pg.get(k);
-      if (!o) items.push(`<li class="add">${esc(g.pc)} apprend ${esc(g.spell)}${g.memory ? " (en mémoire)" : ""}</li>`);
+      if (!o) items.push(`<li class="add">${esc(g.pc)} ${g.learning ? "commence à apprendre" : "apprend"} ${esc(g.spell)}${g.memory ? " (en mémoire)" : ""}</li>`);
       else {
+        if (!!o.learning !== !!g.learning) items.push(`<li class="add">${esc(g.pc)} ${g.learning ? "repasse en apprentissage de" : "a fini d'apprendre"} ${esc(g.spell)}</li>`);
+        else if (g.learning && (o.progress||"") !== (g.progress||"")) items.push(`<li>${esc(g.pc)} : progression sur ${esc(g.spell)}${g.progress ? " (" + esc(g.progress) + ")" : ""}</li>`);
         if (o.memory !== g.memory) items.push(`<li>${esc(g.pc)} : ${esc(g.spell)} ${g.memory ? "passe en mémoire" : "sort de la mémoire"}</li>`);
-        if (o.incantation !== g.incantation) items.push(`<li>${esc(g.pc)} : incantation de ${esc(g.spell)} modifiée</li>`);
+        if (ws(o.incantation) !== ws(g.incantation)) items.push(`<li>${esc(g.pc)} : incantation de ${esc(g.spell)} modifiée</li>`);
       }
     }
     for (const [k,g] of pg) if (!cg.has(k) && inCamp(prev,g.pc)) items.push(`<li class="del">${esc(g.pc)} perd ${esc(g.spell)}</li>`);
@@ -360,7 +376,7 @@ function diff(prev, cur){
   cur.spells.forEach(s => {
     const o = ps.get(norm(s.name));
     if (!o) { cat.push(`<li class="add">Nouveau sort visible : ${esc(s.name)}</li>`); return; }
-    const f = ["cost","type","ref","range","effects","origin"].filter(k => o[k] !== s[k]);
+    const f = ["cost","type","ref","range","effects","origin"].filter(k => ws(o[k]) !== ws(s[k]));
     const lbl = {cost:"coût",type:"type",ref:"réf.",range:"portée",effects:"effets",origin:"origine"};
     if (f.length) cat.push(`<li>${esc(s.name)} : ${f.map(k=>lbl[k]).join(", ")}</li>`);
   });
@@ -553,60 +569,73 @@ function renderApp(keepScroll){
   app.innerHTML = `
     <div class="scroll">
       <header class="head">
-        <div class="top"><span class="camp">${esc(camp.name)}</span>
-          <span class="who"><select id="pcSel" aria-label="Changer de personnage">${view.pcs.map(p => `<option value="${esc(p.id)}" ${pc && p.id===pc.id?"selected":""}>${esc(p.name)}</option>`).join("")}</select></span></div>
+        <div class="top"><span class="camp">${esc(camp.name)}</span></div>
         <div class="pj">${esc(pc ? pc.full : "—")}</div>
         ${pc ? slots(memN, pc.int) : ""}
       </header>
       ${body}
     </div>
     <nav class="tabs" role="tablist">
-      <button role="tab" data-tab="grimoire" aria-selected="${ui.tab==="grimoire"}">Grimoire${pc ? ` <span class="muted">${mine.length}</span>` : ""}</button>
+      <button role="tab" data-tab="grimoire" aria-selected="${ui.tab==="grimoire"}">Grimoire${pc ? ` <span class="muted">${mine.filter(g => !g.learning).length}</span>` : ""}</button>
       <button role="tab" data-tab="biblio" aria-selected="${ui.tab==="biblio"}">Bibliothèque <span class="muted">${view.books.length}</span></button>
     </nav>`;
   if (keepScroll) app.querySelector(".scroll").scrollTop = st;
   bindApp();
 }
+const FILTERS = [
+  { key:"Chaos", kind:"al" }, { key:"Balance", kind:"al" }, { key:"Loi", kind:"al" },
+  { key:"Sort", kind:"form" }, { key:"Rune", kind:"form" }, { key:"Nécromancie", kind:"form" }
+];
 function renderGrimoire(mine){
-  const entries = mine.map(g => ({ g, s: M.spellBy.get(norm(g.spell)) || { name: g.spell, type:"", alignment:"", form:"", cost:"", range:"", effects:"" } }));
-  const als = [...new Set(entries.map(e => e.s.alignment).filter(Boolean))].sort();
-  const forms = [...new Set(entries.map(e => e.s.form).filter(Boolean))].sort();
+  const blank = { type:"", alignment:"", form:"", cost:"", range:"", effects:"" };
+  const entries = mine.map(g => ({ g, s: M.spellBy.get(norm(g.spell)) || { ...blank, name: g.spell } }));
+  const learning = entries.filter(e => e.g.learning).sort((a,b) => norm(a.s.name).localeCompare(norm(b.s.name)));
+  const known = entries.filter(e => !e.g.learning);
+  const memN = known.filter(e => e.g.memory).length;
   const q = norm(ui.q);
-  const shown = entries.filter(({g,s}) =>
-    (!ui.mem || g.memory) &&
-    (!ui.al.size || ui.al.has(s.alignment)) &&
-    (!ui.form.size || ui.form.has(s.form)) &&
-    (!q || norm(s.name + " " + s.effects + " " + g.incantation).includes(q))
-  ).sort((a,b) => norm(a.s.name).localeCompare(norm(b.s.name)));
+  const alF = [...ui.al].map(norm), formF = [...ui.form].map(norm);
+  const match = ({g,s}) =>
+    (!alF.length || alF.includes(norm(s.alignment))) &&
+    (!formF.length || formF.includes(norm(s.form))) &&
+    (!q || norm(s.name + " " + s.effects + " " + g.incantation).includes(q));
+  const shown = known.filter(e => (!ui.mem || e.g.memory) && match(e))
+    .sort((a,b) => norm(a.s.name).localeCompare(norm(b.s.name)));
+  const learnShown = ui.mem ? [] : learning.filter(match);
   let rows = "", last = "";
   shown.forEach(({g,s}) => {
     const L = norm(s.name).charAt(0).toUpperCase();
     if (L !== last){ rows += `<div class="letter">${L}</div>`; last = L; }
     rows += spellRow(s, g);
   });
+  const learnBlock = learnShown.length ? `<div class="learning"><h3>En cours d'apprentissage</h3>${learnShown.map(({g,s}) =>
+      spellRow(s, g, g.progress ? `<span class="prog">${esc(g.progress)}</span>` : "")).join("")}</div>` : "";
+  const filtered = ui.q || ui.al.size || ui.form.size;
   return `
     <div class="tools">
+      <div class="seg" role="group" aria-label="Sorts affichés">
+        <button data-mem="0" aria-pressed="${!ui.mem}">Tous<span class="n">${known.length}</span></button>
+        <button data-mem="1" aria-pressed="${ui.mem}">En mémoire<span class="n">${memN}</span></button>
+      </div>
       <input class="search" id="q" type="search" placeholder="Chercher un sort, un effet…" value="${esc(ui.q)}" autocomplete="off">
       <div class="chips">
-        <button class="chip" data-mem aria-pressed="${ui.mem}">En mémoire</button>
-        ${als.map(a => `<button class="chip al-${esc(a)}" data-al="${esc(a)}" aria-pressed="${ui.al.has(a)}">${esc(a)}</button>`).join("")}
-        ${forms.map(f => `<button class="chip" data-form="${esc(f)}" aria-pressed="${ui.form.has(f)}">${esc(f)}</button>`).join("")}
+        ${FILTERS.map((f,i) => `${i === 3 ? '<span class="sep"></span>' : ""}<button class="chip al-${esc(f.key)}" data-${f.kind}="${esc(f.key)}" aria-pressed="${(f.kind==="al"?ui.al:ui.form).has(f.key)}">${esc(f.key)}</button>`).join("")}
       </div>
     </div>
-    <div class="list">${rows || `<div class="empty">Aucun sort ne correspond.${ui.q||ui.mem||ui.al.size||ui.form.size ? ' <button class="btn" id="reset">Effacer les filtres</button>':''}</div>`}</div>`;
+    <div class="list">${learnBlock}${rows || (learnBlock ? "" : `<div class="empty">${ui.mem && !memN ? "Aucun sort en mémoire." : "Aucun sort ne correspond."}${filtered ? ' <button class="btn" id="reset">Effacer les filtres</button>' : ""}</div>`)}</div>`;
 }
 function renderLibrary(view, mine){
-  const known = new Set(mine.map(g => norm(g.spell)));
+  const known = new Set(mine.filter(g => !g.learning).map(g => norm(g.spell)));
+  const learning = new Set(mine.filter(g => g.learning).map(g => norm(g.spell)));
   if (!view.books.length) return `<div class="list"><div class="empty">Le groupe n'a encore trouvé aucun ouvrage.</div></div>`;
   return `<div class="list">${view.books.map(b => {
     const sp = M.contents.filter(c => norm(c.book) === norm(b.name)).map(c => M.spellBy.get(norm(c.spell))).filter(Boolean)
       .sort((a,b2) => norm(a.name).localeCompare(norm(b2.name)));
-    const toLearn = sp.filter(s => !known.has(norm(s.name))).length;
+    const toLearn = sp.filter(s => !known.has(norm(s.name)) && !learning.has(norm(s.name))).length;
     const mod = b.mod == null ? "" : (b.mod > 0 ? "+" + b.mod : b.mod === 0 ? "±0" : String(b.mod));
     return `<details class="book">
       <summary><span class="bt">${esc(b.name)}</span>
         <span class="bm">${esc([b.lang, mod && "mod. " + mod].filter(Boolean).join(", "))}<br>${sp.length} sorts, ${toLearn} à apprendre</span></summary>
-      ${sp.map(s => spellRow(s, mine.find(g => norm(g.spell)===norm(s.name)), known.has(norm(s.name)) ? ' <span class="tag">connu</span>' : ' <span class="tag learn">à apprendre</span>')).join("")}
+      ${sp.map(s => spellRow(s, mine.find(g => norm(g.spell)===norm(s.name)), known.has(norm(s.name)) ? ' <span class="tag">connu</span>' : learning.has(norm(s.name)) ? ' <span class="tag learning-tag">en apprentissage</span>' : ' <span class="tag learn">à apprendre</span>')).join("")}
     </details>`;
   }).join("")}</div>`;
 }
@@ -622,7 +651,8 @@ function openSpell(name){
     <button class="x" aria-label="Fermer">×</button>
     <h2>${esc(s.name)}</h2>
     <div class="kind">${esc(s.type || "Type non renseigné")}</div>
-    ${g ? `<span class="statusline ${g.memory?"mem":""}">${g.memory ? "En mémoire" : "Connu, à consulter dans le grimoire"}</span>` : pc ? `<span class="statusline">Pas dans le grimoire de ${esc(pc.name)}</span>` : ""}
+    ${g ? (g.learning ? `<span class="statusline learn">En cours d'apprentissage${g.progress ? " : " + esc(g.progress) : ""}</span>`
+      : `<span class="statusline ${g.memory?"mem":""}">${g.memory ? "En mémoire" : "Connu, à consulter dans le grimoire"}</span>`) : pc ? `<span class="statusline">Pas dans le grimoire de ${esc(pc.name)}</span>` : ""}
     <dl class="facts">
       <div><dt>Coût</dt><dd>${esc(s.cost || "—")}${s.cost ? " PM" : ""}</dd></div>
       <div><dt>Portée</dt><dd>${esc(s.range || "—")}</dd></div>
@@ -643,12 +673,10 @@ function openSpell(name){
 }
 function bindApp(){
   const app = $("#app");
-  const sel = app.querySelector("#pcSel");
-  if (sel) sel.onchange = () => { const { camp } = current(); location.hash = `${camp.id}/${sel.value}`; };
   app.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { ui.tab = b.dataset.tab; renderApp(); });
   const q = app.querySelector("#q");
   if (q) q.oninput = () => { ui.q = q.value; const pos = q.selectionStart; renderApp(true); const nq = $("#app #q"); nq.focus(); nq.setSelectionRange(pos,pos); };
-  app.querySelectorAll("[data-mem]").forEach(b => b.onclick = () => { ui.mem = !ui.mem; renderApp(true); });
+  app.querySelectorAll("[data-mem]").forEach(b => b.onclick = () => { ui.mem = b.dataset.mem === "1"; renderApp(true); });
   app.querySelectorAll("[data-al]").forEach(b => b.onclick = () => { const v=b.dataset.al; ui.al.has(v)?ui.al.delete(v):ui.al.add(v); renderApp(true); });
   app.querySelectorAll("[data-form]").forEach(b => b.onclick = () => { const v=b.dataset.form; ui.form.has(v)?ui.form.delete(v):ui.form.add(v); renderApp(true); });
   const r = app.querySelector("#reset"); if (r) r.onclick = () => { ui.q=""; ui.mem=false; ui.al.clear(); ui.form.clear(); renderApp(); };
