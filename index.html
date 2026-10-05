@@ -387,7 +387,7 @@ function diff(prev, cur){
 
 /* ---------- state ---------- */
 let M = null, DIFF = null;
-const ui = { tab:"grimoire", q:"", mem:false, al:new Set(), form:new Set() };
+const ui = { tab:"grimoire", q:"", mem:true, al:new Set(), form:new Set() };
 
 function route(){
   const [c, p] = location.hash.replace(/^#\/?/,"").split("/").map(decodeURIComponent);
@@ -613,8 +613,8 @@ function renderGrimoire(mine){
   return `
     <div class="tools">
       <div class="seg" role="group" aria-label="Sorts affichés">
-        <button data-mem="0" aria-pressed="${!ui.mem}">Tous<span class="n">${known.length}</span></button>
         <button data-mem="1" aria-pressed="${ui.mem}">En mémoire<span class="n">${memN}</span></button>
+        <button data-mem="0" aria-pressed="${!ui.mem}">Tous<span class="n">${known.length}</span></button>
       </div>
       <input class="search" id="q" type="search" placeholder="Chercher un sort, un effet…" value="${esc(ui.q)}" autocomplete="off">
       <div class="chips">
@@ -679,7 +679,7 @@ function bindApp(){
   app.querySelectorAll("[data-mem]").forEach(b => b.onclick = () => { ui.mem = b.dataset.mem === "1"; renderApp(true); });
   app.querySelectorAll("[data-al]").forEach(b => b.onclick = () => { const v=b.dataset.al; ui.al.has(v)?ui.al.delete(v):ui.al.add(v); renderApp(true); });
   app.querySelectorAll("[data-form]").forEach(b => b.onclick = () => { const v=b.dataset.form; ui.form.has(v)?ui.form.delete(v):ui.form.add(v); renderApp(true); });
-  const r = app.querySelector("#reset"); if (r) r.onclick = () => { ui.q=""; ui.mem=false; ui.al.clear(); ui.form.clear(); renderApp(); };
+  const r = app.querySelector("#reset"); if (r) r.onclick = () => { ui.q=""; ui.al.clear(); ui.form.clear(); renderApp(); };
   app.querySelectorAll("[data-spell]").forEach(b => b.onclick = () => openSpell(b.dataset.spell));
 }
 
@@ -711,7 +711,7 @@ function initMJ(){
   ["dragenter","dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
   ["dragleave","drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
   drop.addEventListener("drop", e => e.dataTransfer.files[0] && readFile(e.dataTransfer.files[0]));
-  window.addEventListener("hashchange", () => { ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=false; renderMJ(); renderApp(); });
+  window.addEventListener("hashchange", () => { ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=true; renderMJ(); renderApp(); });
   renderPub();
   if (typeof XLSX === "undefined"){ $("#status").textContent = "Le lecteur de fichiers Excel ne s’est pas chargé."; renderApp(); return; }
   const saved = store.get(LS_CUR);
@@ -747,7 +747,7 @@ function initSite(){
     store.set(LS_ROUTE, location.hash.replace(/^#\/?/,""));
     if (r.c !== LOADED) loadCampaign(r.c); else renderApp();
   };
-  window.addEventListener("hashchange", () => { ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=false; go(); });
+  window.addEventListener("hashchange", () => { ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=true; go(); });
   go();
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
 }
