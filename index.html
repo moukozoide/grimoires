@@ -47,10 +47,18 @@ button,input,select{font:inherit;color:inherit}
 /* ---------- desk layout (PC) ---------- */
 .desk{display:grid;grid-template-columns:minmax(320px,1fr) 410px;gap:28px;max-width:1280px;margin:0 auto;padding:24px}
 .desk.player-only{display:block;padding:0;max-width:none}
-.desk.player-only .mj{display:none}
+.desk.player-only .mj,.desk.player-only .preview-title{display:none}
 .phone{position:sticky;top:24px;height:calc(100vh - 48px);max-height:880px;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:var(--bg);box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .desk.player-only .phone{position:static;height:auto;max-height:none;border:0;border-radius:0;box-shadow:none;overflow:visible}
-@media (max-width:860px){.desk{display:block;padding:0}.desk .mj{display:none}.phone{position:static;height:auto;max-height:none;border:0;border-radius:0;box-shadow:none;overflow:visible}}
+@media (max-width:860px){
+  .desk{display:block;padding:16px}
+  .phone{position:static;height:auto;max-height:none;overflow:visible;margin-top:8px;border-radius:18px;box-shadow:none}
+  .mj .links li{flex-wrap:wrap}
+  .mj .links code{font-size:.75rem;word-break:break-all}
+  .preview-title{display:block}
+}
+.preview-title{display:none;font-family:var(--serif);font-size:1.15rem;margin:18px 0 4px;border-top:1px solid var(--line);padding-top:18px}
+@media (max-width:860px){.preview-title{display:block}}
 
 /* ---------- MJ panel ---------- */
 .mj h1{font-family:var(--display);font-weight:400;font-size:2rem;margin:0 0 4px}
@@ -99,7 +107,7 @@ button,input,select{font:inherit;color:inherit}
 .desk.player-only .app,.phone .app{min-height:100%}
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .desk.player-only .scroll{overflow:visible}
-@media (max-width:860px){.scroll{overflow:visible;padding-bottom:64px}.tabs{position:fixed!important;left:0;right:0;bottom:0;z-index:5}}
+@media (max-width:860px){.scroll{overflow:visible}}
 .desk.player-only .scroll{padding-bottom:64px}
 .desk.player-only .tabs{position:fixed;left:0;right:0;bottom:0;z-index:5}
 .head{padding:18px 16px 12px;background:linear-gradient(var(--bg-2),var(--bg));border-bottom:1px solid var(--line)}
@@ -160,7 +168,6 @@ button,input,select{font:inherit;color:inherit}
 /* detail sheet */
 .sheet{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:10;animation:fade .15s ease}
 .desk.player-only .sheet,.sheet.fixed{position:fixed}
-@media (max-width:860px){.sheet{position:fixed}}
 .sheet .card{background:var(--bg);width:100%;max-height:88%;overflow-y:auto;border-radius:18px 18px 0 0;border-top:3px solid var(--neutre);padding:18px 18px calc(24px + env(safe-area-inset-bottom));animation:up .2s ease}
 .sheet .card.al-Chaos{border-top-color:var(--chaos)} .sheet .card.al-Balance{border-top-color:var(--balance)} .sheet .card.al-Loi{border-top-color:var(--loi)}
 @keyframes up{from{transform:translateY(30px);opacity:.4}} @keyframes fade{from{opacity:0}}
@@ -209,7 +216,7 @@ const yes = v => /^(oui|o|yes|1|vrai|x)$/i.test(String(v ?? "").trim());
 const str = v => v == null ? "" : String(v).trim();
 const b64enc = s => { const b = new TextEncoder().encode(s); let x = ""; for (let i = 0; i < b.length; i += 0x8000) x += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(x); };
 const b64dec = s => new TextDecoder().decode(Uint8Array.from(atob(String(s).replace(/\s/g,"")), c => c.charCodeAt(0)));
-const isDesk = () => MODE === "mj" && $("#mj") && getComputedStyle($("#mj")).display !== "none";
+const isDesk = () => MODE === "mj" && !$("#desk").classList.contains("player-only") && matchMedia("(min-width: 861px)").matches;
 const store = {
   get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
   set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
@@ -417,6 +424,7 @@ function renderMJ(){
     : `<li class="ok">Rien à signaler.</li>`;
   $("#diffTitle").textContent = DIFF_BASE === "online" ? "Changements par rapport au site" : "Changements depuis l'import précédent";
   $("#diff").innerHTML = DIFF || `<p class="muted">${GH.ready() ? "Comparaison avec le site en cours…" : "Importe une nouvelle version du fichier pour voir ce qui a changé."}</p>`;
+  document.querySelectorAll("#links a").forEach(a => a.onclick = () => { if (!isDesk()) setTimeout(() => $("#previewTitle").scrollIntoView({behavior:"smooth"}), 50); });
   document.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "copié"; setTimeout(() => b.textContent = "copier", 1500); } catch {} });
   renderPub();
 }
@@ -524,7 +532,8 @@ function renderPub(){
     const cc = $("#ghCancel"); if (cc) cc.onclick = () => { delete box.dataset.edit; renderPub(); };
     return;
   }
-  box.innerHTML = `<p class="pubinfo">Dépôt <strong>${esc(c.owner)}/${esc(c.repo)}</strong>, site <a href="${esc(GH.siteUrl())}" target="_blank" rel="noopener">${esc(GH.siteUrl())}</a></p>
+  box.innerHTML = `<p class="pubinfo">Dépôt <strong>${esc(c.owner)}/${esc(c.repo)}</strong>, site <a href="${esc(GH.siteUrl())}" target="_blank" rel="noopener">${esc(GH.siteUrl())}</a><br>
+    Page MJ en ligne (pour le téléphone) : <a href="${esc(GH.siteUrl())}mj.html" target="_blank" rel="noopener">${esc(GH.siteUrl())}mj.html</a></p>
     <div class="row">
       <button class="btn primary" id="ghPublish" ${BUSY || !M ? "disabled" : ""}>Publier</button>
       <button class="btn" id="ghRefresh" ${BUSY ? "disabled" : ""}>Comparer avec le site</button>
