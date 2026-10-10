@@ -20,7 +20,6 @@
   --ink:#ebe3d1; --ink-2:#b9b0a0; --ink-3:#857d71;
   --chaos:#c4566b; --balance:#c2a24f; --loi:#7c9fc4; --neutre:#9a948a;
   --warn:#e07a5f; --ok:#7fb07a;
-  --el-gnome:#c08a4c; --el-salamandre:#e0603a; --el-sylphe:#7ba3d4; --el-ondine:#4aaec4;
   --display:"IM Fell English SC", "Alegreya", serif;
   --serif:"Alegreya", Georgia, serif;
   --sans:"Alegreya Sans", system-ui, sans-serif;
@@ -31,7 +30,6 @@
     --bg:#eeebe4; --bg-2:#e3dfd6; --bg-3:#d8d3c8; --line:#c6bfb1;
     --ink:#2a2430; --ink-2:#554d58; --ink-3:#7d7480;
     --chaos:#a3324a; --balance:#8a6a14; --loi:#3d6690; --neutre:#6f6a62;
-    --el-gnome:#86561f; --el-salamandre:#b23c18; --el-sylphe:#3d6aa3; --el-ondine:#1d7488;
     color-scheme: light;
   }
 }
@@ -39,7 +37,6 @@
   --bg:#eeebe4; --bg-2:#e3dfd6; --bg-3:#d8d3c8; --line:#c6bfb1;
   --ink:#2a2430; --ink-2:#554d58; --ink-3:#7d7480;
   --chaos:#a3324a; --balance:#8a6a14; --loi:#3d6690; --neutre:#6f6a62;
-    --el-gnome:#86561f; --el-salamandre:#b23c18; --el-sylphe:#3d6aa3; --el-ondine:#1d7488;
   color-scheme: light;
 }
 *{box-sizing:border-box}
@@ -195,86 +192,6 @@ button,input,select{font:inherit;color:inherit}
 .prog{display:block;color:var(--loi);font-size:.85rem}
 .tag.learning-tag{border-color:var(--loi);color:var(--loi);border-style:dashed}
 .nodata{padding:40px 20px;text-align:center;color:var(--ink-2)}
-/* ---------- invocation des élémentaires ---------- */
-.btn-invoke{display:flex;width:100%;justify-content:space-between;align-items:center;gap:10px;margin:0 0 16px;background:var(--bg-2);border:1px solid var(--balance);border-radius:12px;padding:12px 14px;cursor:pointer;text-align:left}
-.btn-invoke b{font-family:var(--serif);font-size:1.05rem}
-.btn-invoke small{display:block;color:var(--ink-2);font-size:.85rem}
-.btn-invoke .go{color:var(--balance);font-size:1.4rem;line-height:1}
-.inv-back{background:none;border:0;padding:4px 0;cursor:pointer;color:var(--ink-2);font-family:var(--serif);font-size:1rem}
-.inv-back:hover{color:var(--ink)}
-.inv-who{color:var(--ink-2);margin:-4px 0 12px}
-.inv{padding:4px 16px 28px}
-.inv h3{font-family:var(--serif);font-size:1rem;font-weight:700;margin:20px 0 8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.inv h3 .n{font-family:var(--sans);font-weight:400;font-size:.85rem;color:var(--ink-3)}
-.inv .muted.small{font-size:.88rem}
-.el-gnome{--el:var(--el-gnome)} .el-salamandre{--el:var(--el-salamandre)} .el-sylphe{--el:var(--el-sylphe)} .el-ondine{--el:var(--el-ondine)}
-.el-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.el-card{border:1px solid var(--line);border-radius:12px;background:var(--bg-2);padding:8px 4px 7px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
-.el-card img{height:64px;width:auto;max-width:100%;object-fit:contain;opacity:.7;transition:opacity .15s}
-.el-card .nm{font-family:var(--serif);font-size:.95rem;color:var(--ink-2)}
-.el-card .sub{font-size:.75rem;color:var(--ink-3)}
-.el-card[aria-pressed="true"]{border-color:var(--el);box-shadow:inset 0 0 0 1px var(--el)}
-.el-card[aria-pressed="true"] img{opacity:1}
-.el-card[aria-pressed="true"] .nm{color:var(--ink);font-weight:700}
-.el-traits{margin:10px 0 0;border:1px solid var(--line);border-radius:10px;padding:2px 12px}
-.el-traits summary{cursor:pointer;padding:8px 0;color:var(--ink-2);font-size:.92rem}
-.el-traits ul{margin:0 0 8px;padding-left:18px;font-size:.92rem;color:var(--ink-2)}
-.el-traits p{margin:0 0 10px;font-size:.92rem;color:var(--ink-2);border-left:2px solid var(--el,var(--balance));padding-left:10px}
-.pm-row{display:flex;align-items:center;gap:10px}
-.pm-row .val{font-family:var(--display);font-size:2.2rem;min-width:62px;text-align:center;line-height:1}
-.pm-row .val small{display:block;font-family:var(--sans);font-size:.7rem;color:var(--ink-3);letter-spacing:.08em}
-.pm-row input[type=range]{flex:1;accent-color:var(--balance);min-width:0}
-.round{width:34px;height:34px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--bg-2);cursor:pointer;font-size:1.15rem;line-height:1;display:inline-flex;align-items:center;justify-content:center}
-.round:hover:not(:disabled){border-color:var(--ink-3)}
-.round:disabled{opacity:.3;cursor:default}
-.pm-free{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:12px}
-.slot.off{opacity:.25}
-.pm-free .slots-label{flex-basis:auto;margin:0 0 0 8px}
-.inv .note{font-size:.88rem;color:var(--ink-2);margin:8px 0 0}
-.upg{display:grid;grid-template-columns:1fr auto auto;gap:4px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
-.upg:last-child{border-bottom:0}
-.upg .nm{font-family:var(--serif)}
-.upg .nm small{display:block;font-family:var(--sans);color:var(--ink-3);font-size:.78rem}
-.upg .proj{text-align:right;font-size:.9rem;white-space:nowrap}
-.upg .proj s{color:var(--ink-3);text-decoration:none}
-.upg .proj b{font-family:var(--serif)}
-.upg .proj .dmg{display:block;color:var(--ink-3);font-size:.8rem}
-.upg.on .proj b{color:var(--balance)}
-.upg .ctl{display:flex;align-items:center;gap:6px}
-.upg .ctl .round{width:30px;height:30px;font-size:1rem}
-.upg .ctl .c{min-width:16px;text-align:center;font-weight:700}
-.upg.info{opacity:.75}
-.inv-go{display:block;width:100%;margin-top:20px;padding:13px;font-family:var(--serif);font-size:1.1rem;border-radius:12px}
-.el-head{display:flex;align-items:center;gap:12px;margin:12px 0 4px;padding:10px 12px;border:1px solid var(--line);border-left:4px solid var(--el);border-radius:12px;background:var(--bg-2)}
-.el-head img{height:68px;width:auto}
-.el-head .t{flex:1;min-width:0}
-.el-head h2{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0;line-height:1.05}
-.el-head .k{color:var(--ink-2);font-size:.9rem}
-.el-head .pm{font-family:var(--serif);font-weight:700;text-align:center;font-size:1.3rem}
-.el-head .pm small{display:block;font-family:var(--sans);font-weight:400;font-size:.7rem;color:var(--ink-3)}
-.inv .facts{margin:12px 0 0}
-.inv .facts dd small{display:block;font-family:var(--sans);font-weight:400;font-size:.72rem;color:var(--ink-3)}
-.inv .facts dd.up{color:var(--balance)}
-.inv .recap{font-size:.85rem;color:var(--ink-3);margin:8px 0 0}
-.hp-box{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:14px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg-2)}
-.hp-box .lbl{font-size:.85rem;color:var(--ink-2);flex-basis:100%}
-.hp-box input{width:64px;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px}
-.hp-box .cur{margin-left:auto;font-family:var(--serif);font-size:1.1rem}
-.hp-box .cur b{font-size:1.5rem}
-.hp-box .cur.down b{color:var(--warn)}
-.line{display:grid;grid-template-columns:1fr auto;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
-.line:last-child{border-bottom:0}
-.line .nm{font-family:var(--serif)}
-.line .nm small{display:block;font-family:var(--sans);color:var(--ink-3);font-size:.8rem}
-.line .v{font-family:var(--serif);font-weight:700;text-align:right;white-space:nowrap}
-.upm{color:var(--balance);font-size:.7em;margin-left:4px;vertical-align:1px}
-.inv .facts.der{display:flex;flex-wrap:wrap}
-.inv .facts.der div{flex:1 1 30%}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .el-card img,:root:not([data-theme="dark"]) .el-head img{filter:brightness(.42) contrast(1.6) sepia(.35)}}
-:root[data-theme="light"] .el-card img,:root[data-theme="light"] .el-head img{filter:brightness(.42) contrast(1.6) sepia(.35)}
-.pct{font-family:var(--sans);font-weight:500;font-size:.8rem;border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;color:var(--ink-2)}
-.inv-actions{display:grid;gap:8px;margin-top:22px}
-.inv-actions .btn{padding:10px}
 </style>
 </head>
 <body>
@@ -480,8 +397,8 @@ let M = null, DIFF = null;
 const ui = { tab:"grimoire", q:"", mem:true, al:new Set(), form:new Set() };
 
 function route(){
-  const [c, p, v] = location.hash.replace(/^#\/?/,"").split("/").map(decodeURIComponent);
-  return { c, p, v };
+  const [c, p] = location.hash.replace(/^#\/?/,"").split("/").map(decodeURIComponent);
+  return { c, p };
 }
 function current(){
   if (!M) return {};
@@ -652,18 +569,6 @@ function renderApp(keepScroll){
   const { camp, view, pc } = current();
   if (!camp){ app.innerHTML = `<div class="nodata">Aucune campagne dans le fichier.</div>`; return; }
   const sc = app.querySelector(".scroll"); const st = keepScroll && sc ? sc.scrollTop : 0;
-  let inv = route().v === "invoquer";
-  if (inv && !canInvoke()){ history.replaceState(null, "", invHash()); inv = false; }
-  if (inv){
-    if (VIEW !== "inv"){ LIST_SCROLL = { win: window.scrollY, el: sc ? sc.scrollTop : 0 }; }
-    app.innerHTML = `<div class="scroll">${renderInvoke(camp, pc)}</div>`;
-    if (keepScroll) app.querySelector(".scroll").scrollTop = st;
-    else { app.querySelector(".scroll").scrollTop = 0; if (VIEW !== "inv") window.scrollTo(0, 0); }
-    VIEW = "inv";
-    if (ELEM) bindInvoke(); else { const b = app.querySelector("[data-inv-back]"); if (b) b.onclick = leaveInvoke; }
-    return;
-  }
-  const back = VIEW === "inv" && LIST_SCROLL; VIEW = "list";
   const mine = pc ? M.grimoires.filter(g => norm(g.pc) === norm(pc.name)) : [];
   const memN = mine.filter(g => g.memory).length;
   let body = "";
@@ -684,7 +589,6 @@ function renderApp(keepScroll){
       <button role="tab" data-tab="biblio" aria-selected="${ui.tab==="biblio"}">Bibliothèque <span class="muted">${view.books.length}</span></button>
     </nav>`;
   if (keepScroll) app.querySelector(".scroll").scrollTop = st;
-  if (back){ const s = LIST_SCROLL; LIST_SCROLL = null; app.querySelector(".scroll").scrollTop = s.el; requestAnimationFrame(() => window.scrollTo(0, s.win)); }
   bindApp();
 }
 const FILTERS = [
@@ -765,7 +669,6 @@ function openSpell(name){
     </dl>
     ${g && g.incantation ? `<p class="incant">${esc(g.incantation)}</p>` : ""}
     <p class="effects">${esc(s.effects || "Pas de description.")}</p>
-    ${isElemSpell(s.name) && canInvoke() ? invButton() : ""}
     ${books.length ? `<h3>Se trouve dans</h3><p class="small">${books.map(b => esc(b.name) + (b.lang||b.mod!=null ? ` (${esc([b.lang, b.mod!=null ? "mod. "+mod(b.mod) : ""].filter(Boolean).join(", "))})` : "")).join("<br>")}</p>`
       : s.origin ? `<h3>Origine</h3><p class="small">${esc(s.origin)}</p>` : ""}
   </div>`;
@@ -776,7 +679,6 @@ function openSpell(name){
   document.addEventListener("keydown", onKey);
   sheet.addEventListener("click", e => { if (e.target === sheet || e.target.closest(".x")) close(); });
   sheet.querySelector(".x").focus();
-  const ib = sheet.querySelector("[data-invoke]"); if (ib) ib.onclick = () => { close(); goInvoke(); };
 }
 function bindApp(){
   const app = $("#app");
@@ -789,296 +691,6 @@ function bindApp(){
   const r = app.querySelector("#reset"); if (r) r.onclick = () => { ui.q=""; ui.al.clear(); ui.form.clear(); renderApp(); };
   app.querySelectorAll("[data-spell]").forEach(b => b.onclick = () => openSpell(b.dataset.spell));
 }
-
-/* ---------- invocation des élémentaires ---------- */
-const ELEM_SPELL = "Convoquer un Elémentaire";
-const ELEM_RULES_PATH = "regles/elementaires.json";
-const LS_INV = "grimoires.invocation.";
-const isElemSpell = n => norm(n) === norm(ELEM_SPELL);
-let ELEM = null, ELEM_ERR = false, INV_FROM_APP = false, VIEW = "list", LIST_SCROLL = null;
-
-async function loadElemRules(){
-  if (ELEM) return ELEM;
-  try {
-    if (SITE_FILES[ELEM_RULES_PATH]) ELEM = JSON.parse(SITE_FILES[ELEM_RULES_PATH]);
-    else { const r = await fetch(ELEM_RULES_PATH, { cache: "no-cache" }); if (r.ok) ELEM = await r.json(); }
-  } catch {}
-  ELEM_ERR = !ELEM;
-  return ELEM;
-}
-/* Le MJ a toujours accès (PNJ) ; un PJ seulement s'il connaît le sort (pas en cours d'apprentissage). */
-function canInvoke(){
-  if (MODE === "mj") return true;
-  const { pc } = current();
-  return !!(pc && M.grimoires.some(g => norm(g.pc) === norm(pc.name) && isElemSpell(g.spell) && !g.learning));
-}
-function invKey(){ if (MODE === "mj") return LS_INV + "mj"; const { camp, pc } = current(); return LS_INV + (camp ? camp.id : "") + "/" + (pc ? pc.id : ""); }
-function invState(){ return Object.assign({ elem:"Gnome", pm:21, mode:"libre", up:{}, tab:"prep", sheet:null }, store.get(invKey()) || {}); }
-function invSave(st){ store.set(invKey(), st); }
-function invHash(extra){
-  const r = route(), cur = M ? current() : {};
-  const c = r.c || (cur.camp ? cur.camp.id : ""), p = r.p || (cur.pc ? cur.pc.id : "-");
-  return "#" + [c, p, extra].filter(x => x != null && x !== "").map(encodeURIComponent).join("/");
-}
-function goInvoke(){ INV_FROM_APP = true; location.hash = invHash("invoquer"); }
-function leaveInvoke(){
-  if (INV_FROM_APP){ INV_FROM_APP = false; history.back(); }
-  else location.replace(invHash());
-}
-
-/* règles */
-const pmIdx = pm => pm < 30 ? 0 : pm - 29;
-const freePM = pm => pm < 30 ? pm - 21 : 8;
-const STATS6 = ["STR","CON","SIZ","INT","POW","DEX"];
-const frMov = m => ({Run:"course",Jump:"saut",Fly:"vol",Swim:"nage"}[m] || m);
-const frSkill = sk => /^Ways of/.test(sk) ? "Art : " + sk : sk;
-const rollD6 = n => { let s = 0; for (let i = 0; i < n; i++) s += 1 + Math.floor(Math.random()*6); return s; };
-const usedPM = up => Object.values(up).reduce((a,b) => a + b, 0);
-function catalogue(R){
-  const l = [
-    {key:"STR", label:"STR +1D6", cap:Infinity}, {key:"CON", label:"CON +1D6", cap:Infinity}, {key:"SIZ", label:"SIZ +1D6", cap:Infinity},
-    {key:"INT", label:"INT +1D6", sub:"une fois au plus", cap:1}
-  ];
-  if (R.canDex) l.push({key:"DEX", label:"DEX +1D6", sub:"une fois au plus", cap:1});
-  Object.keys(R.mov).forEach(m => l.push({key:"MOV:"+m, label:`MOV (${frMov(m)}) +2`, cap:Infinity}));
-  Object.keys(R.rolls).forEach(r => l.push({key:"ROLL:"+r, label:r+" +10%", cap:Infinity}));
-  R.fixedSkills.forEach(([sk]) => l.push({key:"SKILL:"+sk, label:frSkill(sk)+" +10%", cap:Infinity}));
-  l.push({key:"LANG", label:"Langue de l'invocateur +10%", sub:"base INT×2", cap:Infinity});
-  return l;
-}
-function projection(R, pm, up, key){
-  const i = pmIdx(pm), c = up[key] || 0;
-  if (STATS6.includes(key)){ const s = R.stats[key], b = s.bonus ? "+" + s.bonus : ""; return { base:s.min[i]+"D6"+b, now:(s.min[i]+c)+"D6"+b }; }
-  if (key.startsWith("MOV:")){ const v = R.mov[key.slice(4)][i]; return { base:""+v, now:""+(v+c*2) }; }
-  if (key.startsWith("ROLL:")){ const v = R.rolls[key.slice(5)][i]; return { base:v+"%", now:(v+c*10)+"%" }; }
-  if (key.startsWith("SKILL:")){ const e = R.fixedSkills.find(s => s[0] === key.slice(6)); const v = e ? e[1] : 0; return { base:v+"%", now:(v+c*10)+"%" }; }
-  if (key === "LANG") return { base:"INT×2", now: c ? "INT×2 +" + c*10 + "%" : "INT×2" };
-  return { base:"", now:"" };
-}
-function impactDB(v){
-  const t = [[1,4,"-5"],[5,8,"-4"],[9,12,"-3"],[13,15,"-2"],[16,18,"-1"],[19,23,"0"],[24,26,"+1"],[27,29,"+2"],[30,33,"+3"],[34,37,"+4"],[38,41,"+5"]];
-  for (const [a,b,x] of t) if (v >= a && v <= b) return x;
-  if (v < 1) return "-5";
-  if (v <= 53) return "2D6";
-  return (Math.floor((v - 54) / 14) + 3) + "D6";
-}
-function attackDamage(pct){
-  const S = {0:"",10:"1D2",20:"1D4",30:"1D6",40:"1D8"};
-  if (pct <= 0) return "—";
-  const d10 = Math.floor(pct/50), r = Math.floor((pct % 50)/10)*10;
-  if (!d10) return S[r] || "1D2";
-  return d10 + "D10" + (S[r] ? "+" + S[r] : "");
-}
-function withDB(base, imp){
-  if (!imp || imp === "0") return base;
-  if (/D6/.test(imp)){
-    const n = parseInt(imp, 10), t = base.split("+");
-    const i = t.findIndex(x => /^\d+D6$/.test(x));
-    if (i >= 0){ t[i] = (parseInt(t[i], 10) + n) + "D6"; return t.join("+"); }
-    return base + "+" + imp;
-  }
-  return imp[0] === "-" ? base + "−" + imp.slice(1) : base + "+" + imp.replace(/^\+/, "");
-}
-const doubleDice = f => f.split("+").map(x => { const m = x.match(/^(\d+)D(\d+)$/); return m ? (m[1]*2) + "D" + m[2] : x; }).join("+");
-function attackCount(elem, major, dex){
-  let n = major ? Math.floor((dex - 1) / 5) + 1 : 1;
-  return elem === "Gnome" ? Math.max(2, n) : n;
-}
-function dmgPair(R, atk, pct, imp){
-  const base = attackDamage(pct), db = R.dbAttacks.includes(atk);
-  return db ? `${withDB(base, imp)} / ${withDB(doubleDice(base), imp)}` : `${base} / ${doubleDice(base)}`;
-}
-function conjure(st){
-  const R = ELEM.elementals[st.elem], i = pmIdx(st.pm), vals = {};
-  STATS6.forEach(s => { const n = R.stats[s].min[i] + (s === "POW" ? 0 : (st.up[s] || 0)); vals[s] = rollD6(n) + R.stats[s].bonus; });
-  st.sheet = { elem: st.elem, pm: st.pm, up: { ...st.up }, vals, hpLoss: 0 };
-  st.tab = "fiche";
-}
-function randomUp(st){
-  const R = ELEM.elementals[st.elem], cat = catalogue(R), total = freePM(st.pm);
-  st.up = {};
-  for (let k = 0; k < total; k++){
-    const av = cat.filter(u => (st.up[u.key] || 0) < u.cap);
-    if (!av.length) break;
-    const u = av[Math.floor(Math.random()*av.length)];
-    st.up[u.key] = (st.up[u.key] || 0) + 1;
-  }
-}
-
-/* rendu */
-function invButton(){
-  const st = store.get(invKey()), sh = st && st.sheet;
-  if (sh){
-    const max = sh.vals.CON + sh.vals.SIZ;
-    return `<button class="btn-invoke" data-invoke><span><b>Reprendre l'élémentaire</b><small>${esc(sh.elem)} · ${sh.pm} PM · HP ${max - (sh.hpLoss||0)} / ${max}</small></span><span class="go">›</span></button>`;
-  }
-  return `<button class="btn-invoke" data-invoke><span><b>Invoquer un élémentaire</b><small>Choisir l'élémentaire et répartir les PM</small></span><span class="go">›</span></button>`;
-}
-function renderInvoke(camp, pc){
-  if (!ELEM){
-    if (!ELEM_ERR) loadElemRules().then(() => { if (route().v === "invoquer") renderApp(); });
-    return `<div class="nodata">${ELEM_ERR ? "Les règles d'invocation n'ont pas pu être chargées. Vérifie la connexion puis recharge la page." : "Chargement…"}</div>`;
-  }
-  const st = invState();
-  if (st.tab === "fiche" && !st.sheet) st.tab = "prep";
-  const who = MODE === "mj" ? "Meneur de jeu (PNJ)" : (pc ? pc.full : "");
-  return `
-    <header class="head">
-      <div class="top"><button class="inv-back" data-inv-back>‹ Sorts</button><span class="camp">${esc(camp.name)}</span></div>
-      <div class="pj">Invocation</div>
-      <div class="inv-who">${esc(who)}</div>
-      <div class="seg" role="group" aria-label="Invocation">
-        <button data-inv-tab="prep" aria-pressed="${st.tab === "prep"}">Préparer</button>
-        <button data-inv-tab="fiche" aria-pressed="${st.tab === "fiche"}" ${st.sheet ? "" : "disabled"}>Élémentaire${st.sheet ? `<span class="n">${esc(st.sheet.elem)}</span>` : ""}</button>
-      </div>
-    </header>
-    <div class="inv">${st.tab === "fiche" ? renderSheet(st) : renderPrep(st)}</div>`;
-}
-function renderPrep(st){
-  const R = ELEM.elementals[st.elem], total = freePM(st.pm), used = usedPM(st.up), left = total - used;
-  const cards = Object.entries(ELEM.elementals).map(([k,d]) => `<button class="el-card el-${esc(d.color)}" data-inv-el="${esc(k)}" aria-pressed="${k === st.elem}">
-      <img src="${d.img}" alt=""><span class="nm">${esc(d.name)}</span><span class="sub">${esc(d.element)}</span></button>`).join("");
-  let pips = "";
-  for (let i = 0; i < 8; i++) pips += `<span class="slot ${i >= total ? "off" : i < used ? "on" : ""}"></span>`;
-  const upgRows = catalogue(R).map(u => {
-    const c = st.up[u.key] || 0, p = projection(R, st.pm, st.up, u.key);
-    let dmg = "";
-    if (u.key.startsWith("ROLL:") && u.key !== "ROLL:Dodge"){
-      const atk = u.key.slice(5), pct = R.rolls[atk][pmIdx(st.pm)] + c*10;
-      dmg = `<span class="dmg">${dmgPair(R, atk, pct, "DB")}${R.rangedAttacks.includes(atk) ? " · portée DB" : ""}</span>`;
-    }
-    return `<div class="upg ${c ? "on" : ""}"><div class="nm">${esc(u.label)}${u.sub ? `<small>${esc(u.sub)}</small>` : ""}</div>
-      <div class="proj">${c ? `<s>${esc(p.base)}</s> → ` : ""}<b>${esc(p.now)}</b>${dmg}</div>
-      <div class="ctl"><button class="round" data-inv-up="${esc(u.key)}" data-d="-1" ${c <= 0 ? "disabled" : ""} aria-label="Retirer">−</button><span class="c">${c}</span>
-        <button class="round" data-inv-up="${esc(u.key)}" data-d="1" ${left <= 0 || c >= u.cap ? "disabled" : ""} aria-label="Ajouter">+</button></div></div>`;
-  }).join("");
-  const drown = R.hasDrown ? `<div class="upg info"><div class="nm">Drown by Touch<small>STR×3, non améliorable</small></div><div class="proj"><b>1D6 / 2D6</b></div><div></div></div>` : "";
-  const replace = st.sheet ? `<p class="note">Un ${esc(st.sheet.elem.toLowerCase())} est déjà invoqué : le manifester à nouveau le remplacera.</p>` : "";
-  return `
-    <h3>L'élémentaire convoqué</h3>
-    <div class="el-grid">${cards}</div>
-    <details class="el-traits el-${esc(R.color)}"><summary>Résistance et particularités</summary>
-      <ul>${R.resist.map(r => `<li>${esc(r)}</li>`).join("")}</ul><p>${esc(R.note)}</p></details>
-    <h3>Points de magie investis</h3>
-    <div class="pm-row">
-      <button class="round" data-inv-pm="-1" ${st.pm <= ELEM.pmMin ? "disabled" : ""} aria-label="Un PM de moins">−</button>
-      <input type="range" id="invPm" min="${ELEM.pmMin}" max="${ELEM.pmMax}" step="1" value="${st.pm}" aria-label="PM investis">
-      <button class="round" data-inv-pm="1" ${st.pm >= ELEM.pmMax ? "disabled" : ""} aria-label="Un PM de plus">+</button>
-      <div class="val"><span id="invPmVal">${st.pm}</span><small>PM</small></div>
-    </div>
-    <div class="pm-free">${pips}<span class="slots-label">${used} / ${total} PM libres répartis</span></div>
-    ${st.pm > 21 && st.pm < 30 ? `<p class="note">Entre 22 et 29 PM, les minima restent ceux de 21 PM ; les ${total} PM au-delà se répartissent librement.</p>` : ""}
-    ${st.pm >= 30 ? `<p class="note">À partir de 30 PM, l'élémentaire est majeur ; les minima suivent la table et 8 PM restent à répartir.</p>` : ""}
-    <h3>Répartition des PM libres</h3>
-    <div class="seg" role="group" aria-label="Mode de répartition">
-      <button data-inv-mode="libre" aria-pressed="${st.mode === "libre"}">Libre</button>
-      <button data-inv-mode="alea" aria-pressed="${st.mode === "alea"}">Aléatoire</button>
-    </div>
-    ${st.mode === "libre" ? `<div>${upgRows}${drown}</div>`
-      : `<p class="note">Les ${total} PM libres seront répartis au hasard parmi les améliorations autorisées, puis l'élémentaire sera manifesté.</p>`}
-    ${replace}
-    <button class="btn primary inv-go" id="invGo">${st.mode === "alea" ? "Tirer au sort et manifester" : "Manifester l'élémentaire"}</button>`;
-}
-function renderSheet(st){
-  const sh = st.sheet, R = ELEM.elementals[sh.elem], i = pmIdx(sh.pm), up = sh.up, v = sh.vals;
-  const hp = v.CON + v.SIZ, imp = impactDB(v.STR + v.SIZ), major = sh.pm >= 30;
-  const n = attackCount(sh.elem, major, v.DEX);
-  const atkLabel = sh.elem === "Gnome" ? "1 Brawl + 1 Earth Hammer" + (major && v.DEX >= 11 ? " + 1 à répartir" : "") : `${n} attaque${n > 1 ? "s" : ""} par round à répartir`;
-  const stats = STATS6.map(s => {
-    const d = R.stats[s], dice = d.min[i] + (s === "POW" ? 0 : (up[s] || 0));
-    return `<div><dt>${s}</dt><dd class="${s !== "POW" && up[s] ? "up" : ""}">${v[s]}<small>${dice}D6${d.bonus ? "+" + d.bonus : ""}</small></dd></div>`;
-  }).join("");
-  const movs = Object.keys(R.mov).map(m => `<div><dt>MOV ${frMov(m)}</dt><dd class="${up["MOV:"+m] ? "up" : ""}">${R.mov[m][i] + (up["MOV:"+m] || 0)*2}</dd></div>`).join("");
-  const dbTxt = /D6/.test(imp) ? "+" + imp : imp;
-  const atks = Object.keys(R.rolls).filter(r => r !== "Dodge").map(r => {
-    const pct = R.rolls[r][i] + (up["ROLL:"+r] || 0)*10, ranged = R.rangedAttacks.includes(r);
-    let range = "";
-    if (ranged){ const n2 = parseInt(imp, 10); range = ` · portée ${/D6/.test(imp) ? imp : Math.max(1, isNaN(n2) ? 1 : n2)} m`; }
-    return `<div class="line ${up["ROLL:"+r] ? "up" : ""}"><div class="nm">${esc(r)}${up["ROLL:"+r] ? '<span class="upm">▲</span>' : ""}<span class="pct">${pct}%</span><small>normal / critique${R.dbAttacks.includes(r) ? ", DB inclus" : ""}${range}</small></div><div class="v">${dmgPair(R, r, pct, imp)}</div></div>`;
-  }).join("") + (R.hasDrown ? `<div class="line"><div class="nm">Drown by Touch<span class="pct">${v.STR*3}%</span><small>STR×3 · ignore l'armure · ne peut qu'être esquivé · si réussi, la victime perd ses attaques pendant 4 secondes</small></div><div class="v">1D6 / 2D6</div></div>` : "");
-  const skills = [];
-  if (R.rolls.Dodge) skills.push([ "Dodge", R.rolls.Dodge[i] + (up["ROLL:Dodge"] || 0)*10, up["ROLL:Dodge"] ]);
-  R.fixedSkills.forEach(([sk, val]) => skills.push([ frSkill(sk), val + (up["SKILL:"+sk] || 0)*10, up["SKILL:"+sk] ]));
-  skills.push([ "Langue de l'invocateur", v.INT*2 + (up.LANG || 0)*10, up.LANG, "INT×2" ]);
-  const recap = catalogue(R).filter(u => up[u.key]).map(u => {
-    const nm = u.key.startsWith("MOV:") ? "MOV " + frMov(u.key.slice(4)) : u.label.replace(/ \+1D6| \+10%| \+2/, "");
-    return nm + (up[u.key] > 1 ? " ×" + up[u.key] : "");
-  });
-  const cur = hp - (sh.hpLoss || 0);
-  return `
-    <div class="el-head el-${esc(R.color)}">
-      <img src="${R.img}" alt="">
-      <div class="t"><h2>${esc(R.name)}</h2><div class="k">Élémentaire ${/^[AEIOU]/.test(R.element) ? "d'" : "de "}${esc(R.element.toLowerCase())} · ${major ? "majeur" : "mineur"}</div></div>
-      <div class="pm">${sh.pm}<small>PM</small></div>
-    </div>
-    <dl class="facts">${stats}</dl>
-    <dl class="facts der"><div><dt>HP</dt><dd>${hp}</dd></div><div><dt>DB</dt><dd>${esc(dbTxt)}</dd></div>${movs}</dl>
-    <p class="recap">${recap.length ? "PM répartis : " + esc(recap.join(" · ")) : "Aucun PM libre réparti."}</p>
-    <div class="hp-box">
-      <span class="lbl">Dommages subis</span>
-      <button class="round" data-inv-hp="-1" aria-label="Un point de moins">−</button>
-      <input type="number" id="invHp" min="0" inputmode="numeric" value="${sh.hpLoss || 0}" aria-label="Dommages subis">
-      <button class="round" data-inv-hp="1" aria-label="Un point de plus">+</button>
-      <span class="cur ${cur <= 0 ? "down" : ""}" id="invHpCur">HP <b>${cur}</b> / ${hp}</span>
-    </div>
-    <h3>Attaques <span class="n">${esc(atkLabel)}</span></h3>
-    <div>${atks}</div>
-    <h3>Compétences</h3>
-    <div>${skills.map(([nm, val, isUp, sub]) => `<div class="line ${isUp ? "up" : ""}"><div class="nm">${esc(nm)}${isUp ? '<span class="upm">▲</span>' : ""}${sub ? `<small>${sub}${isUp ? " +" + isUp*10 + "%" : ""}</small>` : ""}</div><div class="v">${val}%</div></div>`).join("")}</div>
-    <h3>Résistance et particularités</h3>
-    <div>${R.resist.map(r => `<div class="line"><div class="nm"><small style="font-size:.92rem;color:var(--ink-2)">${esc(r)}</small></div><div></div></div>`).join("")}</div>
-    <p class="effects" style="margin-top:10px;font-size:.95rem;color:var(--ink-2)">${esc(R.note)}</p>
-    <details class="el-traits el-${esc(R.color)}"><summary>Nature de l'élémentaire</summary><ul>${R.lore.map(l => `<li>${esc(l)}</li>`).join("")}</ul></details>
-    <div class="inv-actions">
-      <button class="btn" data-inv-tab="prep">Préparer une autre invocation</button>
-      <button class="btn" id="invDismiss">Renvoyer l'élémentaire</button>
-    </div>`;
-}
-function bindInvoke(){
-  const app = $("#app");
-  const upd = f => { const st = invState(); f(st); invSave(st); renderApp(true); };
-  const b = app.querySelector("[data-inv-back]"); if (b) b.onclick = leaveInvoke;
-  app.querySelectorAll("[data-inv-tab]").forEach(x => x.onclick = () => upd(st => { if (x.dataset.invTab === "prep" || st.sheet) st.tab = x.dataset.invTab; }));
-  app.querySelectorAll("[data-inv-el]").forEach(x => x.onclick = () => upd(st => { if (st.elem !== x.dataset.invEl){ st.elem = x.dataset.invEl; st.up = {}; } }));
-  const setPm = (st, pm) => {
-    st.pm = Math.min(ELEM.pmMax, Math.max(ELEM.pmMin, pm));
-    const total = freePM(st.pm);
-    while (usedPM(st.up) > total){ const k = Object.keys(st.up).filter(k => st.up[k] > 0).pop(); st.up[k]--; if (!st.up[k]) delete st.up[k]; }
-  };
-  app.querySelectorAll("[data-inv-pm]").forEach(x => x.onclick = () => upd(st => setPm(st, st.pm + Number(x.dataset.invPm))));
-  const r = app.querySelector("#invPm");
-  if (r){ r.oninput = () => { $("#invPmVal").textContent = r.value; }; r.onchange = () => upd(st => setPm(st, Number(r.value))); }
-  app.querySelectorAll("[data-inv-up]").forEach(x => x.onclick = () => upd(st => {
-    const k = x.dataset.invUp, d = Number(x.dataset.d), u = catalogue(ELEM.elementals[st.elem]).find(u => u.key === k), c = st.up[k] || 0;
-    if (d > 0 && (usedPM(st.up) >= freePM(st.pm) || c >= u.cap)) return;
-    if (d < 0 && c <= 0) return;
-    st.up[k] = c + d; if (!st.up[k]) delete st.up[k];
-  }));
-  app.querySelectorAll("[data-inv-mode]").forEach(x => x.onclick = () => upd(st => { st.mode = x.dataset.invMode; if (st.mode === "libre") st.up = {}; }));
-  const go = app.querySelector("#invGo");
-  if (go) go.onclick = () => {
-    const st = invState();
-    if (st.sheet && !confirm(`Remplacer le ${st.sheet.elem.toLowerCase()} déjà invoqué ?`)) return;
-    if (st.mode === "alea") randomUp(st);
-    conjure(st); invSave(st); renderApp(); window.scrollTo(0, 0);
-  };
-  const dis = app.querySelector("#invDismiss");
-  if (dis) dis.onclick = () => { if (!confirm("Renvoyer l'élémentaire ? Sa fiche sera effacée.")) return; upd(st => { st.sheet = null; st.tab = "prep"; }); };
-  const hpIn = app.querySelector("#invHp");
-  const showHp = st => { const max = st.sheet.vals.CON + st.sheet.vals.SIZ, cur = max - st.sheet.hpLoss, el = $("#invHpCur"); el.innerHTML = `HP <b>${cur}</b> / ${max}`; el.classList.toggle("down", cur <= 0); };
-  if (hpIn) hpIn.oninput = () => { const st = invState(); st.sheet.hpLoss = Math.max(0, parseInt(hpIn.value, 10) || 0); invSave(st); showHp(st); };
-  app.querySelectorAll("[data-inv-hp]").forEach(x => x.onclick = () => {
-    const st = invState(); st.sheet.hpLoss = Math.max(0, (st.sheet.hpLoss || 0) + Number(x.dataset.invHp)); invSave(st);
-    hpIn.value = st.sheet.hpLoss; showHp(st);
-  });
-}
-
-
-/* ---------- navigation ---------- */
-let LAST_CP = null;
-function cpChanged(){ const r = route(), k = (r.c || "") + "/" + (r.p || ""); const ch = LAST_CP !== null && k !== LAST_CP; LAST_CP = k; return ch; }
-function resetUi(){ ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=true; }
-function onRouteChange(){ if (cpChanged()) resetUi(); if (route().v !== "invoquer") INV_FROM_APP = false; }
 
 /* ---------- loading (MJ) ---------- */
 function load(data, {fromFile} = {}){
@@ -1108,9 +720,7 @@ function initMJ(){
   ["dragenter","dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
   ["dragleave","drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
   drop.addEventListener("drop", e => e.dataTransfer.files[0] && readFile(e.dataTransfer.files[0]));
-  window.addEventListener("hashchange", () => { onRouteChange(); renderMJ(); renderApp(); });
-  cpChanged();
-  const mi = $("#mjInvoke"); if (mi) mi.onclick = () => { if (!M) return; INV_FROM_APP = true; location.hash = invHash("invoquer"); if (!isDesk()) setTimeout(() => $("#previewTitle").scrollIntoView({behavior:"smooth"}), 50); };
+  window.addEventListener("hashchange", () => { ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=true; renderMJ(); renderApp(); });
   renderPub();
   if (typeof XLSX === "undefined"){ $("#status").textContent = "Le lecteur de fichiers Excel ne s’est pas chargé."; renderApp(); return; }
   const saved = store.get(LS_CUR);
@@ -1146,8 +756,7 @@ function initSite(){
     store.set(LS_ROUTE, location.hash.replace(/^#\/?/,""));
     if (r.c !== LOADED) loadCampaign(r.c); else renderApp();
   };
-  window.addEventListener("hashchange", () => { onRouteChange(); go(); });
-  cpChanged();
+  window.addEventListener("hashchange", () => { ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=true; go(); });
   go();
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
 }
