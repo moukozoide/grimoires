@@ -827,7 +827,18 @@ function invAccess(){
 const canInvoke = () => !!invAccess();
 function invKey(){ const { camp, pc } = current(); if (MODE === "mj") return LS_INV + "mj/" + (camp ? camp.id : "");
   if (invAccess() === "essai") return LS_INV + "essai/" + (camp ? camp.id : "") + "/" + (pc ? pc.id : ""); return LS_INV + (camp ? camp.id : "") + "/" + (pc ? pc.id : ""); }
-function invState(){ return Object.assign({ elem:"Gnome", pm:21, mode:"libre", up:{}, tab:"prep", sheet:null }, store.get(invKey()) || {}); }
+function invState(){
+  const st = Object.assign({ elem:"Gnome", pm:21, mode:"libre", up:{}, tab:"prep", sheet:null }, store.get(invKey()) || {});
+  const cv = pmConv();
+  if (cv){
+    /* La dépense affichée (st.spent) est convertie en PM de la table (st.pm), sans que le joueur le voie. */
+    if (st.spent == null) st.spent = cv.min + Math.max(0, Math.ceil((st.pm - cv.base) / cv.perPoint));
+    st.spent = Math.min(cv.max, Math.max(cv.min, st.spent));
+    st.pm = toTablePM(st.spent);
+    trimUp(st);
+  }
+  return st;
+}
 function invSave(st){ store.set(invKey(), st); }
 function invHash(extra){
   const r = route(), cur = M ? current() : {};
@@ -841,6 +852,18 @@ function leaveInvoke(){
 }
 
 /* règles */
+/* Conversion des PM dépensés en PM de la table (règle de campagne « pm ») ; null = PM de la table saisis directement. */
+function pmConv(){ const r = campRule(); return r && r.pm ? r.pm : null; }
+function toTablePM(spent){ const cv = pmConv(); return cv ? cv.base + cv.perPoint * (spent - cv.min) : spent; }
+function pmRange(){ const cv = pmConv(); return cv ? { min: cv.min, max: cv.max } : { min: ELEM.pmMin, max: ELEM.pmMax }; }
+const shownPM = st => pmConv() ? st.spent : st.pm;
+const sheetPM = sh => sh.spent != null ? sh.spent : sh.pm;
+const freeWord = () => pmConv() ? "point" : "PM";
+const freeWords = () => pmConv() ? "points" : "PM";
+function trimUp(st){
+  const total = freePM(st.pm);
+  while (usedPM(st.up) > total){ const k = Object.keys(st.up).filter(k => st.up[k] > 0).pop(); st.up[k]--; if (!st.up[k]) delete st.up[k]; }
+}
 /* Règle propre à une campagne (regles/elementaires.json → campaignRules) : chances des compétences et attaques.
    Les dommages se calculent toujours comme si chaque PM ajoutait 10 % (dmgPct). */
 function campRule(){ const { camp } = current(); return (ELEM && ELEM.campaignRules && camp && ELEM.campaignRules[camp.id]) || null; }
@@ -916,7 +939,7 @@ function dmgPair(R, atk, pct, imp){
 function conjure(st){
   const R = ELEM.elementals[st.elem], i = pmIdx(st.pm), vals = {};
   STATS6.forEach(s => { const n = R.stats[s].min[i] + (s === "POW" ? 0 : (st.up[s] || 0)); vals[s] = rollD6(n) + R.stats[s].bonus; });
-  st.sheet = { elem: st.elem, pm: st.pm, up: { ...st.up }, vals, hpLoss: 0, rule: campRule() };
+  st.sheet = { elem: st.elem, pm: st.pm, spent: pmConv() ? st.spent : null, up: { ...st.up }, vals, hpLoss: 0, rule: campRule() };
   st.tab = "fiche";
 }
 function randomUp(st){
@@ -936,7 +959,7 @@ function invButton(){
   const cls = "btn-invoke" + (essai ? " essai" : "");
   if (sh){
     const max = sh.vals.CON + sh.vals.SIZ;
-    return `<button class="${cls}" data-invoke><span><b>${essai ? "Reprendre la simulation" : "Reprendre l'élémentaire"}</b><small>${esc(sh.elem)} · ${sh.pm} PM · HP ${max - (sh.hpLoss||0)} / ${max}</small></span><span class="go">›</span></button>`;
+    return `<button class="${cls}" data-invoke><span><b>${essai ? "Reprendre la simulation" : "Reprendre l'élémentaire"}</b><small>${esc(sh.elem)} · ${sheetPM(sh)} PM · HP ${max - (sh.hpLoss||0)} / ${max}</small></span><span class="go">›</span></button>`;
   }
   if (essai) return `<button class="${cls}" data-invoke><span><b>Découvrir l'invocation</b><small>Sort pas encore appris : simuler un élémentaire pour voir comment il fonctionne</small></span><span class="go">›</span></button>`;
   return `<button class="${cls}" data-invoke><span><b>Invoquer un élémentaire</b><small>Choisir l'élémentaire et répartir les PM</small></span><span class="go">›</span></button>`;
@@ -989,22 +1012,23 @@ function renderPrep(st){
       <ul>${R.resist.map(r => `<li>${esc(r)}</li>`).join("")}</ul><p>${esc(R.note)}</p></details>
     <h3>Points de magie investis</h3>
     <div class="pm-row">
-      <button class="round" data-inv-pm="-1" ${st.pm <= ELEM.pmMin ? "disabled" : ""} aria-label="Un PM de moins">−</button>
-      <input type="range" id="invPm" min="${ELEM.pmMin}" max="${ELEM.pmMax}" step="1" value="${st.pm}" aria-label="PM investis">
-      <button class="round" data-inv-pm="1" ${st.pm >= ELEM.pmMax ? "disabled" : ""} aria-label="Un PM de plus">+</button>
-      <div class="val"><span id="invPmVal">${st.pm}</span><small>PM</small></div>
+      <button class="round" data-inv-pm="-1" ${shownPM(st) <= pmRange().min ? "disabled" : ""} aria-label="Un PM de moins">−</button>
+      <input type="range" id="invPm" min="${pmRange().min}" max="${pmRange().max}" step="1" value="${shownPM(st)}" aria-label="PM investis">
+      <button class="round" data-inv-pm="1" ${shownPM(st) >= pmRange().max ? "disabled" : ""} aria-label="Un PM de plus">+</button>
+      <div class="val"><span id="invPmVal">${shownPM(st)}</span><small>PM</small></div>
     </div>
-    <div class="pm-free">${pips}<span class="slots-label">${used} / ${total} PM libres répartis</span></div>
-    ${st.pm > 21 && st.pm < 30 ? `<p class="note">Entre 22 et 29 PM, les minima restent ceux de 21 PM ; les ${total} PM au-delà se répartissent librement.</p>` : ""}
-    ${st.pm >= 30 ? `<p class="note">À partir de 30 PM, l'élémentaire est majeur ; les minima suivent la table et 8 PM restent à répartir.</p>` : ""}
-    <h3>Répartition des PM libres</h3>
+    <div class="pm-free">${pips}<span class="slots-label">${used} / ${total} ${freeWords()} libres répartis</span></div>
+    ${pmConv() ? (total ? `<p class="note">L'élémentaire est ${st.pm >= 30 ? "majeur" : "mineur"} ; ${total} point${total > 1 ? "s" : ""} libre${total > 1 ? "s" : ""} à répartir.</p>` : `<p class="note">À ${st.spent} PM, l'élémentaire est mineur et aucun point libre n'est à répartir.</p>`) : ""}
+    ${!pmConv() && st.pm > 21 && st.pm < 30 ? `<p class="note">Entre 22 et 29 PM, les minima restent ceux de 21 PM ; les ${total} PM au-delà se répartissent librement.</p>` : ""}
+    ${!pmConv() && st.pm >= 30 ? `<p class="note">À partir de 30 PM, l'élémentaire est majeur ; les minima suivent la table et 8 PM restent à répartir.</p>` : ""}
+    <h3>Répartition des ${freeWords()} libres</h3>
     <div class="seg" role="group" aria-label="Mode de répartition">
       <button data-inv-mode="libre" aria-pressed="${st.mode === "libre"}">Libre</button>
       <button data-inv-mode="alea" aria-pressed="${st.mode === "alea"}">Aléatoire</button>
     </div>
-    ${rule ? `<p class="note">Règle ${esc(rule.name)} : chaque PM libre investi dans une compétence ou une attaque ajoute ${rule.step}% aux chances (${rule.stepOver}% au-delà de ${rule.cap}%). Les dommages des attaques se calculent comme si chaque PM ajoutait 10%.</p>` : ""}
+    ${rule ? `<p class="note">Chaque ${freeWord()} libre investi dans une compétence ou une attaque ajoute ${rule.step}% aux chances (${rule.stepOver}% au-delà de ${rule.cap}%). Les dommages des attaques se calculent comme si chaque ${freeWord()} ajoutait 10%.</p>` : ""}
     ${st.mode === "libre" ? `<div>${upgRows}${drown}</div>`
-      : `<p class="note">Les ${total} PM libres seront répartis au hasard parmi les améliorations autorisées, puis l'élémentaire sera manifesté.</p>`}
+      : `<p class="note">Les ${total} ${freeWords()} libres seront répartis au hasard parmi les améliorations autorisées, puis l'élémentaire sera manifesté.</p>`}
     ${replace}
     <button class="btn primary inv-go" id="invGo">${st.mode === "alea" ? "Tirer au sort et manifester" : "Manifester l'élémentaire"}</button>`;
 }
@@ -1038,11 +1062,11 @@ function renderSheet(st){
     <div class="el-head el-${esc(R.color)}">
       <img src="${R.img}" alt="">
       <div class="t"><h2>${esc(R.name)}</h2><div class="k">Élémentaire ${/^[AEIOU]/.test(R.element) ? "d'" : "de "}${esc(R.element.toLowerCase())} · ${major ? "majeur" : "mineur"}</div></div>
-      <div class="pm">${sh.pm}<small>PM</small></div>
+      <div class="pm">${sheetPM(sh)}<small>PM</small></div>
     </div>
     <dl class="facts">${stats}</dl>
     <dl class="facts der"><div><dt>HP</dt><dd>${hp}</dd></div><div><dt>DB</dt><dd>${esc(dbTxt)}</dd></div>${movs}</dl>
-    <p class="recap">${recap.length ? "PM répartis : " + esc(recap.join(" · ")) : "Aucun PM libre réparti."}</p>
+    <p class="recap">${recap.length ? (sh.spent != null ? "Points répartis : " : "PM répartis : ") + esc(recap.join(" · ")) : (sh.spent != null ? "Aucun point libre réparti." : "Aucun PM libre réparti.")}</p>
     <div class="hp-box">
       <span class="lbl">Dommages subis</span>
       <button class="round" data-inv-hp="-1" aria-label="Un point de moins">−</button>
@@ -1069,12 +1093,13 @@ function bindInvoke(){
   const b = app.querySelector("[data-inv-back]"); if (b) b.onclick = leaveInvoke;
   app.querySelectorAll("[data-inv-tab]").forEach(x => x.onclick = () => upd(st => { if (x.dataset.invTab === "prep" || st.sheet) st.tab = x.dataset.invTab; }));
   app.querySelectorAll("[data-inv-el]").forEach(x => x.onclick = () => upd(st => { if (st.elem !== x.dataset.invEl){ st.elem = x.dataset.invEl; st.up = {}; } }));
-  const setPm = (st, pm) => {
-    st.pm = Math.min(ELEM.pmMax, Math.max(ELEM.pmMin, pm));
-    const total = freePM(st.pm);
-    while (usedPM(st.up) > total){ const k = Object.keys(st.up).filter(k => st.up[k] > 0).pop(); st.up[k]--; if (!st.up[k]) delete st.up[k]; }
+  const setPm = (st, v) => {
+    const rg = pmRange(); v = Math.min(rg.max, Math.max(rg.min, v));
+    if (pmConv()) st.spent = v;
+    st.pm = toTablePM(v);
+    trimUp(st);
   };
-  app.querySelectorAll("[data-inv-pm]").forEach(x => x.onclick = () => upd(st => setPm(st, st.pm + Number(x.dataset.invPm))));
+  app.querySelectorAll("[data-inv-pm]").forEach(x => x.onclick = () => upd(st => setPm(st, shownPM(st) + Number(x.dataset.invPm))));
   const r = app.querySelector("#invPm");
   if (r){ r.oninput = () => { $("#invPmVal").textContent = r.value; }; r.onchange = () => upd(st => setPm(st, Number(r.value))); }
   app.querySelectorAll("[data-inv-up]").forEach(x => x.onclick = () => upd(st => {
