@@ -629,14 +629,17 @@ function renderPub(){
   const box = $("#pub"); if (!box) return;
   const c = GH.cfg();
   if (!GH.ready() || box.dataset.edit === "1"){
-    box.innerHTML = `<div class="form">
-      <label>Nom d'utilisateur GitHub<input id="ghOwner" value="${esc(c.owner)}" autocomplete="off" spellcheck="false"></label>
-      <label>Nom du dépôt<input id="ghRepo" value="${esc(c.repo || "grimoires")}" autocomplete="off" spellcheck="false"></label>
-      <label>Clé de publication<input id="ghToken" type="password" value="${esc(c.token)}" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
-      <div class="row"><button class="btn primary" id="ghSave">Enregistrer et tester</button>${GH.ready() ? '<button class="btn" id="ghCancel">Annuler</button>' : ""}</div>
-      <p class="muted" style="margin:0;font-size:.88rem">La clé reste dans ce navigateur, sur ce PC. Elle n'est envoyée qu'à GitHub.</p>
-    </div><div class="msg ${PUB_CLS}">${esc(PUB_MSG)}</div>`;
-    $("#ghSave").onclick = async () => {
+    /* Vrai formulaire identifiant + mot de passe : le gestionnaire de mots de passe du téléphone ou du PC
+       propose d'enregistrer la clé, puis la remplit tout seul (onglet « grimoires »). */
+    box.innerHTML = `<form class="form" id="ghForm" action="#" method="post" autocomplete="on">
+      <label>Nom d'utilisateur GitHub<input id="ghOwner" name="username" value="${esc(c.owner)}" autocomplete="username" autocapitalize="none" spellcheck="false"></label>
+      <label>Nom du dépôt<input id="ghRepo" name="repo" value="${esc(c.repo || "grimoires")}" autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+      <label>Clé de publication<input id="ghToken" name="password" type="password" value="${esc(c.token)}" autocomplete="current-password" spellcheck="false" placeholder="github_pat_…"></label>
+      <div class="row"><button class="btn primary" id="ghSave" type="submit">Enregistrer et tester</button>${GH.ready() ? '<button class="btn" id="ghCancel" type="button">Annuler</button>' : ""}</div>
+      <p class="muted" style="margin:0;font-size:.88rem">La clé reste dans ce navigateur, sur cet appareil. Elle n'est envoyée qu'à GitHub. Accepte de l'enregistrer quand ton navigateur le propose : il la remplira tout seul la prochaine fois.</p>
+    </form><div class="msg ${PUB_CLS}">${esc(PUB_MSG)}</div>`;
+    $("#ghForm").onsubmit = async e => {
+      e.preventDefault();
       const cfg = { owner: $("#ghOwner").value.trim(), repo: $("#ghRepo").value.trim() || "grimoires", token: $("#ghToken").value.trim() };
       if (!cfg.owner || !cfg.token) return setMsg("Renseigne le nom d'utilisateur et la clé.", "err");
       store.set(LS_GH, cfg);
