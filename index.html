@@ -195,6 +195,13 @@ button,input,select{font:inherit;color:inherit}
 .prog{display:block;color:var(--loi);font-size:.85rem}
 .tag.learning-tag{border-color:var(--loi);color:var(--loi);border-style:dashed}
 .nodata{padding:40px 20px;text-align:center;color:var(--ink-2)}
+.mj-pcs{padding-top:0}
+.chip.learn-chip{border-style:dashed;border-color:var(--loi);color:var(--loi)}
+.chip.learn-chip[aria-pressed="true"]{background:var(--loi);border-color:var(--loi);color:var(--bg)}
+.chip .n{opacity:.75;margin-left:2px}
+.mj-who{color:var(--ink-3)}
+.mj-legend{margin:0 0 6px;font-size:.82rem}
+.tag.hidden-tag{border-style:dashed;color:var(--warn);border-color:var(--warn)}
 /* ---------- invocation des élémentaires ---------- */
 .btn-invoke{display:flex;width:100%;justify-content:space-between;align-items:center;gap:10px;margin:0 0 16px;background:var(--bg-2);border:1px solid var(--balance);border-radius:12px;padding:12px 14px;cursor:pointer;text-align:left}
 .btn-invoke b{font-family:var(--serif);font-size:1.05rem}
@@ -399,6 +406,21 @@ function campaignView(M, campName){
   return { pcs, books, visible };
 }
 
+/* ---------- variantes de sorts propres à une campagne ---------- */
+/* Le catalogue de sorts est commun aux campagnes. Une campagne dont la règle d'invocation fixe
+   sa propre dépense (regles/elementaires.json → campaignRules.<id>.pm) affiche ce minimum pour
+   « Convoquer un Elémentaire ». Appliqué à la publication et à l'affichage. */
+function rulesSync(){
+  if (!ELEM && SITE_FILES[ELEM_RULES_PATH]) { try { ELEM = JSON.parse(SITE_FILES[ELEM_RULES_PATH]); } catch {} }
+  return ELEM;
+}
+function campSpell(s, campId){
+  const R = rulesSync(), r = R && R.campaignRules && R.campaignRules[campId];
+  if (s && r && r.pm && isElemSpell(s.name)) return { ...s, cost: r.pm.min + " minimum" };
+  return s;
+}
+function curCampId(){ const r = route(); if (r.c) return r.c; const c = current().camp; return c ? c.id : ""; }
+
 /* ---------- what gets published: one file per active campaign ---------- */
 function publishedViews(M){
   return M.campaigns.filter(c => c.active).map(c => {
@@ -410,7 +432,7 @@ function publishedViews(M){
       pcs: v.pcs.map(({campaign,name,full,id,int}) => ({campaign,name,full,id,int,active:true})),
       books: v.books.map(({campaign,name,lang,mod}) => ({campaign,name,lang,mod,revealed:true})),
       contents: M.contents.filter(x => bN.has(norm(x.book))).map(({book,spell}) => ({book,spell})),
-      spells: M.spells.filter(s => v.visible.has(norm(s.name))),
+      spells: M.spells.filter(s => v.visible.has(norm(s.name))).map(s => campSpell(s, c.id)),
       grimoires: M.grimoires.filter(g => pcN.has(norm(g.pc)))
     }};
   });
@@ -482,7 +504,10 @@ function diff(prev, cur){
 
 /* ---------- state ---------- */
 let M = null, DIFF = null;
-const ui = { tab:"grimoire", q:"", mem:true, al:new Set(), form:new Set() };
+const ui = { tab:"grimoire", q:"", mem:true, al:new Set(), form:new Set(), mjPc:"" };
+/* Grimoire du MJ : route #<campagne>/mj, uniquement sur la page MJ (jamais publié sur le site des joueurs). */
+const MJ_ID = "mj";
+const isMjView = () => MODE === "mj" && route().p === MJ_ID;
 
 function route(){
   const [c, p, v] = location.hash.replace(/^#\/?/,"").split("/").map(decodeURIComponent);
@@ -494,6 +519,7 @@ function current(){
   let camp = M.campaigns.find(x => x.id === r.c) || M.campaigns.find(x => x.active) || M.campaigns[0];
   if (!camp) return {};
   const view = campaignView(M, camp.name);
+  if (MODE === "mj" && r.p === MJ_ID) return { camp, view, pc: null, mj: true };
   let pc = view.pcs.find(p => p.id === r.p) || view.pcs[0];
   return { camp, view, pc };
 }
@@ -505,7 +531,7 @@ function renderMJ(){
     const pcs = M.pcs.filter(p => norm(p.campaign) === norm(c.name));
     const cur = current();
     return `<div class="camp-name">${esc(c.name)}${c.active ? "" : ' <span class="muted">(inactive)</span>'}</div>
-      <ul class="links">${pcs.map(p => `<li class="${cur.pc && cur.pc.name===p.name ? "cur":""}"><a href="#${encodeURIComponent(c.id)}/${encodeURIComponent(p.id)}">${esc(p.name)}${p.active?"":' <span class="muted">(inactif)</span>'}</a><span>${GH.ready() ? `<code>${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}</code><button class="copy" data-copy="${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}">copier</button>` : `<code>…/#${esc(c.id)}/${esc(p.id)}</code>`}</span></li>`).join("") || '<li class="muted">Aucun PJ</li>'}</ul>`;
+      <ul class="links"><li class="${cur.mj && cur.camp && cur.camp.id === c.id ? "cur" : ""}"><a href="#${encodeURIComponent(c.id)}/${MJ_ID}">Grimoire du MJ</a><span><code>page MJ uniquement</code></span></li>${pcs.map(p => `<li class="${cur.pc && cur.pc.name===p.name ? "cur":""}"><a href="#${encodeURIComponent(c.id)}/${encodeURIComponent(p.id)}">${esc(p.name)}${p.active?"":' <span class="muted">(inactif)</span>'}</a><span>${GH.ready() ? `<code>${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}</code><button class="copy" data-copy="${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}">copier</button>` : `<code>…/#${esc(c.id)}/${esc(p.id)}</code>`}</span></li>`).join("") || '<li class="muted">Aucun PJ</li>'}</ul>`;
   }).join("");
   $("#issues").innerHTML = M.issues.length
     ? M.issues.map(i => typeof i === "string" ? `<li>${esc(i)}</li>` : `<li class="info">${esc(i.text)}</li>`).join("")
@@ -643,6 +669,7 @@ function slots(n, int){
   return `<div class="slots" title="${n} sorts en mémoire sur ${int}">${h}<span class="slots-label ${n>int?"over":""}">${n} / ${int} en mémoire</span></div>`;
 }
 function spellRow(s, g, extra=""){
+  s = campSpell(s, curCampId());
   const al = esc(s.alignment);
   return `<button class="spell al-${al}" data-spell="${esc(s.name)}">
     <span class="bar"></span>
@@ -669,6 +696,26 @@ function renderApp(keepScroll){
     return;
   }
   const back = VIEW === "inv" && LIST_SCROLL; VIEW = "list";
+  if (current().mj){
+    const books = M.books.filter(b => norm(b.campaign) === norm(camp.name));
+    app.innerHTML = `
+    <div class="scroll">
+      <header class="head">
+        <div class="top"><span class="camp">${esc(camp.name)}</span></div>
+        <div class="pj">Grimoire du MJ</div>
+        <div class="inv-who">Tous les sorts, tous les grimoires, tous les ouvrages.</div>
+      </header>
+      ${ui.tab === "grimoire" ? renderMjGrimoire(camp) : renderMjLibrary(books)}
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="grimoire" aria-selected="${ui.tab==="grimoire"}">Sorts <span class="muted">${M.spells.length}</span></button>
+      <button role="tab" data-tab="biblio" aria-selected="${ui.tab==="biblio"}">Bibliothèque <span class="muted">${books.length}</span></button>
+    </nav>`;
+    if (keepScroll) app.querySelector(".scroll").scrollTop = st;
+    if (back){ const s = LIST_SCROLL; LIST_SCROLL = null; app.querySelector(".scroll").scrollTop = s.el; requestAnimationFrame(() => window.scrollTo(0, s.win)); }
+    bindApp();
+    return;
+  }
   const mine = pc ? M.grimoires.filter(g => norm(g.pc) === norm(pc.name)) : [];
   const memN = mine.filter(g => g.memory).length;
   let body = "";
@@ -733,6 +780,68 @@ function renderGrimoire(mine){
     </div>
     <div class="list">${learnBlock}${rows || (learnBlock ? "" : `<div class="empty">${ui.mem && !memN ? "Aucun sort en mémoire." : "Aucun sort ne correspond."}${filtered ? ' <button class="btn" id="reset">Effacer les filtres</button>' : ""}</div>`)}</div>`;
 }
+function campPcs(camp){ return M.pcs.filter(p => norm(p.campaign) === norm(camp.name)); }
+function knownBy(camp, spellName){
+  return campPcs(camp).map(p => ({ p, g: M.grimoires.find(g => norm(g.pc) === norm(p.name) && norm(g.spell) === norm(spellName)) })).filter(x => x.g);
+}
+function renderMjGrimoire(camp){
+  const pcs = campPcs(camp);
+  const sel = pcs.find(p => p.id === ui.mjPc) || null;
+  const LEARN = "__apprentissage", learnMode = ui.mjPc === LEARN;
+  const learning = M.grimoires.filter(g => g.learning && pcs.some(p => norm(p.name) === norm(g.pc)));
+  const learnSet = new Set(learning.map(g => norm(g.spell)));
+  const q = norm(ui.q), alF = [...ui.al].map(norm), formF = [...ui.form].map(norm);
+  let list = M.spells.slice();
+  if (learnMode) list = list.filter(s => learnSet.has(norm(s.name)));
+  if (sel){ const own = new Set(M.grimoires.filter(g => norm(g.pc) === norm(sel.name)).map(g => norm(g.spell))); list = list.filter(s => own.has(norm(s.name))); }
+  list = list.filter(s => (!alF.length || alF.includes(norm(s.alignment))) && (!formF.length || formF.includes(norm(s.form))) && (!q || norm(s.name + " " + s.effects).includes(q)))
+    .sort((a,b) => norm(a.name).localeCompare(norm(b.name)));
+  let rows = "", last = "";
+  list.forEach(s => {
+    const L = norm(s.name).charAt(0).toUpperCase();
+    if (L !== last){ rows += `<div class="letter">${L}</div>`; last = L; }
+    let extra = "";
+    if (learnMode){
+      extra = `<span class="prog">${learning.filter(g => norm(g.spell) === norm(s.name)).map(g => esc(g.pc) + (g.progress ? " : " + esc(g.progress) : "")).join("<br>")}</span>`;
+    } else if (sel){
+      const g = M.grimoires.find(g => norm(g.pc) === norm(sel.name) && norm(g.spell) === norm(s.name));
+      extra = g.learning ? ' <span class="tag learning-tag">en apprentissage</span>' : g.memory ? ' <span class="tag">en mémoire</span>' : "";
+    } else {
+      const kb = knownBy(camp, s.name);
+      extra = `<span class="prog mj-who">${kb.length ? kb.map(({p,g}) => esc(p.name) + (g.learning ? " (appr.)" : g.memory ? " ◆" : "")).join(", ") : "Aucun PJ"}</span>`;
+    }
+    rows += spellRow(s, null, extra);
+  });
+  const filtered = ui.q || ui.al.size || ui.form.size;
+  return `
+    <div class="tools">
+      <div class="chips mj-pcs">
+        <button class="chip" data-mjpc="" aria-pressed="${!sel && !learnMode}">Tous les sorts</button>
+        <button class="chip learn-chip" data-mjpc="${LEARN}" aria-pressed="${learnMode}">En apprentissage <span class="n">${learnSet.size}</span></button>
+        <span class="sep"></span>
+        ${pcs.map(p => `<button class="chip" data-mjpc="${esc(p.id)}" aria-pressed="${sel && sel.id === p.id}">${esc(p.name)}</button>`).join("")}
+      </div>
+      <input class="search" id="q" type="search" placeholder="Chercher un sort, un effet…" value="${esc(ui.q)}" autocomplete="off">
+      <div class="chips">
+        ${FILTERS.map((f,i) => `${i === 3 ? '<span class="sep"></span>' : ""}<button class="chip al-${esc(f.key)}" data-${f.kind}="${esc(f.key)}" aria-pressed="${(f.kind==="al"?ui.al:ui.form).has(f.key)}">${esc(f.key)}</button>`).join("")}
+      </div>
+      ${sel || learnMode ? "" : '<p class="muted mj-legend">◆ en mémoire · (appr.) en cours d\'apprentissage</p>'}
+    </div>
+    <div class="list">${rows || `<div class="empty">${learnMode && !learnSet.size ? "Aucun sort en cours d'apprentissage." : "Aucun sort ne correspond."}${filtered ? ' <button class="btn" id="reset">Effacer les filtres</button>' : ""}</div>`}</div>`;
+}
+function renderMjLibrary(books){
+  if (!books.length) return `<div class="list"><div class="empty">Aucun ouvrage dans cette campagne.</div></div>`;
+  return `<div class="list">${books.map(b => {
+    const sp = M.contents.filter(c => norm(c.book) === norm(b.name)).map(c => M.spellBy.get(norm(c.spell))).filter(Boolean)
+      .sort((a,b2) => norm(a.name).localeCompare(norm(b2.name)));
+    const mod = b.mod == null ? "" : (b.mod > 0 ? "+" + b.mod : b.mod === 0 ? "±0" : String(b.mod));
+    return `<details class="book">
+      <summary><span class="bt">${esc(b.name)}${b.revealed ? "" : ' <span class="tag hidden-tag">non révélé</span>'}</span>
+        <span class="bm">${esc([b.lang, mod && "mod. " + mod].filter(Boolean).join(", "))}<br>${sp.length} sorts</span></summary>
+      ${sp.map(s => spellRow(s, null)).join("")}
+    </details>`;
+  }).join("")}</div>`;
+}
 function renderLibrary(view, mine){
   const known = new Set(mine.filter(g => !g.learning).map(g => norm(g.spell)));
   const learning = new Set(mine.filter(g => g.learning).map(g => norm(g.spell)));
@@ -750,10 +859,11 @@ function renderLibrary(view, mine){
   }).join("")}</div>`;
 }
 function openSpell(name){
-  const { view, pc } = current();
-  const s = M.spellBy.get(norm(name)); if (!s) return;
+  const { view, pc, camp, mj } = current();
+  const s = campSpell(M.spellBy.get(norm(name)), curCampId()); if (!s) return;
   const g = pc && M.grimoires.find(x => norm(x.pc)===norm(pc.name) && norm(x.spell)===norm(name));
-  const books = view.books.filter(b => M.contents.some(c => norm(c.book)===norm(b.name) && norm(c.spell)===norm(name)));
+  const books = (mj ? M.books.filter(b => norm(b.campaign) === norm(camp.name)) : view.books).filter(b => M.contents.some(c => norm(c.book)===norm(b.name) && norm(c.spell)===norm(name)));
+  const kb = mj ? knownBy(camp, name) : [];
   const mod = m => m == null ? "" : (m > 0 ? "+" + m : m === 0 ? "±0" : String(m));
   const sheet = document.createElement("div");
   sheet.className = "sheet" + (isDesk() ? "" : " fixed");
@@ -771,7 +881,8 @@ function openSpell(name){
     ${g && g.incantation ? `<p class="incant">${esc(g.incantation)}</p>` : ""}
     <p class="effects">${esc(s.effects || "Pas de description.")}</p>
     ${isElemSpell(s.name) && canInvoke() ? invButton() : ""}
-    ${books.length ? `<h3>Se trouve dans</h3><p class="small">${books.map(b => esc(b.name) + (b.lang||b.mod!=null ? ` (${esc([b.lang, b.mod!=null ? "mod. "+mod(b.mod) : ""].filter(Boolean).join(", "))})` : "")).join("<br>")}</p>`
+    ${mj ? `<h3>Connu de</h3><p class="small">${kb.length ? kb.map(({p,g}) => esc(p.name) + " : " + (g.learning ? "en apprentissage" + (g.progress ? " (" + esc(g.progress) + ")" : "") : g.memory ? "en mémoire" : "connu")).join("<br>") : "Aucun PJ"}</p>` : ""}
+    ${books.length ? `<h3>Se trouve dans</h3><p class="small">${books.map(b => esc(b.name) + (b.lang||b.mod!=null ? ` (${esc([b.lang, b.mod!=null ? "mod. "+mod(b.mod) : ""].filter(Boolean).join(", "))})` : "") + (mj && !b.revealed ? " — non révélé" : "")).join("<br>")}</p>`
       : s.origin ? `<h3>Origine</h3><p class="small">${esc(s.origin)}</p>` : ""}
   </div>`;
   const host = isDesk() ? $("#phone") : document.body;
@@ -792,6 +903,7 @@ function bindApp(){
   app.querySelectorAll("[data-al]").forEach(b => b.onclick = () => { const v=b.dataset.al; ui.al.has(v)?ui.al.delete(v):ui.al.add(v); renderApp(true); });
   app.querySelectorAll("[data-form]").forEach(b => b.onclick = () => { const v=b.dataset.form; ui.form.has(v)?ui.form.delete(v):ui.form.add(v); renderApp(true); });
   const r = app.querySelector("#reset"); if (r) r.onclick = () => { ui.q=""; ui.al.clear(); ui.form.clear(); renderApp(); };
+  app.querySelectorAll("[data-mjpc]").forEach(b => b.onclick = () => { ui.mjPc = b.dataset.mjpc; renderApp(true); });
   app.querySelectorAll("[data-spell]").forEach(b => b.onclick = () => openSpell(b.dataset.spell));
 }
 
@@ -812,12 +924,12 @@ async function loadElemRules(){
   return ELEM;
 }
 /* Accès à l'invocation :
-   "full"  : le MJ (PNJ), ou un PJ qui connaît le sort ;
+   "full"  : le grimoire du MJ, ou un PJ qui connaît le sort ;
    "essai" : un PJ qui l'a en cours d'apprentissage, ou qui peut le trouver dans un ouvrage révélé à sa campagne
              (simulation pour découvrir le sort, rangée à part) ;
    null    : pas d'accès. */
 function invAccess(){
-  if (MODE === "mj") return "full";
+  if (isMjView()) return "full";
   const { pc, view } = current();
   if (!pc) return null;
   const g = M.grimoires.find(g => norm(g.pc) === norm(pc.name) && isElemSpell(g.spell));
@@ -827,7 +939,7 @@ function invAccess(){
   return inBook ? "essai" : null;
 }
 const canInvoke = () => !!invAccess();
-function invKey(){ const { camp, pc } = current(); if (MODE === "mj") return LS_INV + "mj/" + (camp ? camp.id : "");
+function invKey(){ const { camp, pc } = current(); if (isMjView()) return LS_INV + "mj/" + (camp ? camp.id : "");
   if (invAccess() === "essai") return LS_INV + "essai/" + (camp ? camp.id : "") + "/" + (pc ? pc.id : ""); return LS_INV + (camp ? camp.id : "") + "/" + (pc ? pc.id : ""); }
 function invState(){
   const st = Object.assign({ elem:"Gnome", pm:21, mode:"libre", up:{}, tab:"prep", sheet:null }, store.get(invKey()) || {});
@@ -973,12 +1085,12 @@ function renderInvoke(camp, pc){
   }
   const st = invState();
   if (st.tab === "fiche" && !st.sheet) st.tab = "prep";
-  const who = MODE === "mj" ? "Meneur de jeu (PNJ)" : (pc ? pc.full : "");
+  const who = pc ? pc.full : "";
   return `
     <header class="head">
       <div class="top"><button class="inv-back" data-inv-back>‹ Sorts</button><span class="camp">${esc(camp.name)}</span></div>
       <div class="pj">Invocation</div>
-      <div class="inv-who">${esc(who)}</div>
+      ${who ? `<div class="inv-who">${esc(who)}</div>` : ""}
       ${invAccess() === "essai" ? `<div class="inv-essai">Simulation : ${esc(pc ? pc.name : "")} n'a pas encore appris le sort. L'élémentaire simulé est rangé à part et ne sera pas repris une fois le sort appris.</div>` : ""}
       <div class="seg" role="group" aria-label="Invocation">
         <button data-inv-tab="prep" aria-pressed="${st.tab === "prep"}">Préparer</button>
@@ -1140,7 +1252,7 @@ function bindInvoke(){
 /* ---------- navigation ---------- */
 let LAST_CP = null;
 function cpChanged(){ const r = route(), k = (r.c || "") + "/" + (r.p || ""); const ch = LAST_CP !== null && k !== LAST_CP; LAST_CP = k; return ch; }
-function resetUi(){ ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=true; }
+function resetUi(){ ui.q=""; ui.al.clear(); ui.form.clear(); ui.mem=true; ui.mjPc=""; }
 function onRouteChange(){ if (cpChanged()) resetUi(); if (route().v !== "invoquer") INV_FROM_APP = false; }
 
 /* ---------- loading (MJ) ---------- */
@@ -1173,7 +1285,7 @@ function initMJ(){
   drop.addEventListener("drop", e => e.dataTransfer.files[0] && readFile(e.dataTransfer.files[0]));
   window.addEventListener("hashchange", () => { onRouteChange(); renderMJ(); renderApp(); });
   cpChanged();
-  const mi = $("#mjInvoke"); if (mi) mi.onclick = () => { if (!M) return; INV_FROM_APP = true; location.hash = invHash("invoquer"); if (!isDesk()) setTimeout(() => $("#previewTitle").scrollIntoView({behavior:"smooth"}), 50); };
+
   renderPub();
   if (typeof XLSX === "undefined"){ $("#status").textContent = "Le lecteur de fichiers Excel ne s’est pas chargé."; renderApp(); return; }
   const saved = store.get(LS_CUR);
