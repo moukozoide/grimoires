@@ -203,6 +203,9 @@ button,input,select{font:inherit;color:inherit}
 .inv-back{background:none;border:0;padding:4px 0;cursor:pointer;color:var(--ink-2);font-family:var(--serif);font-size:1rem}
 .inv-back:hover{color:var(--ink)}
 .inv-who{color:var(--ink-2);margin:-4px 0 12px}
+.btn-invoke.essai{border-style:dashed;border-color:var(--loi)}
+.btn-invoke.essai .go{color:var(--loi)}
+.inv-essai{font-size:.88rem;color:var(--loi);border:1px dashed var(--loi);border-radius:10px;padding:6px 10px;margin:-4px 0 12px}
 .inv{padding:4px 16px 28px}
 .inv h3{font-family:var(--serif);font-size:1rem;font-weight:700;margin:20px 0 8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .inv h3 .n{font-family:var(--sans);font-weight:400;font-size:.85rem;color:var(--ink-3)}
@@ -806,13 +809,24 @@ async function loadElemRules(){
   ELEM_ERR = !ELEM;
   return ELEM;
 }
-/* Le MJ a toujours accès (PNJ) ; un PJ seulement s'il connaît le sort (pas en cours d'apprentissage). */
-function canInvoke(){
-  if (MODE === "mj") return true;
-  const { pc } = current();
-  return !!(pc && M.grimoires.some(g => norm(g.pc) === norm(pc.name) && isElemSpell(g.spell) && !g.learning));
+/* Accès à l'invocation :
+   "full"  : le MJ (PNJ), ou un PJ qui connaît le sort ;
+   "essai" : un PJ qui l'a en cours d'apprentissage, ou qui peut le trouver dans un ouvrage révélé à sa campagne
+             (simulation pour découvrir le sort, rangée à part) ;
+   null    : pas d'accès. */
+function invAccess(){
+  if (MODE === "mj") return "full";
+  const { pc, view } = current();
+  if (!pc) return null;
+  const g = M.grimoires.find(g => norm(g.pc) === norm(pc.name) && isElemSpell(g.spell));
+  if (g && !g.learning) return "full";
+  if (g) return "essai";
+  const inBook = view.books.some(b => M.contents.some(c => norm(c.book) === norm(b.name) && isElemSpell(c.spell)));
+  return inBook ? "essai" : null;
 }
-function invKey(){ const { camp, pc } = current(); if (MODE === "mj") return LS_INV + "mj/" + (camp ? camp.id : ""); return LS_INV + (camp ? camp.id : "") + "/" + (pc ? pc.id : ""); }
+const canInvoke = () => !!invAccess();
+function invKey(){ const { camp, pc } = current(); if (MODE === "mj") return LS_INV + "mj/" + (camp ? camp.id : "");
+  if (invAccess() === "essai") return LS_INV + "essai/" + (camp ? camp.id : "") + "/" + (pc ? pc.id : ""); return LS_INV + (camp ? camp.id : "") + "/" + (pc ? pc.id : ""); }
 function invState(){ return Object.assign({ elem:"Gnome", pm:21, mode:"libre", up:{}, tab:"prep", sheet:null }, store.get(invKey()) || {}); }
 function invSave(st){ store.set(invKey(), st); }
 function invHash(extra){
@@ -918,12 +932,14 @@ function randomUp(st){
 
 /* rendu */
 function invButton(){
-  const st = store.get(invKey()), sh = st && st.sheet;
+  const st = store.get(invKey()), sh = st && st.sheet, essai = invAccess() === "essai";
+  const cls = "btn-invoke" + (essai ? " essai" : "");
   if (sh){
     const max = sh.vals.CON + sh.vals.SIZ;
-    return `<button class="btn-invoke" data-invoke><span><b>Reprendre l'élémentaire</b><small>${esc(sh.elem)} · ${sh.pm} PM · HP ${max - (sh.hpLoss||0)} / ${max}</small></span><span class="go">›</span></button>`;
+    return `<button class="${cls}" data-invoke><span><b>${essai ? "Reprendre la simulation" : "Reprendre l'élémentaire"}</b><small>${esc(sh.elem)} · ${sh.pm} PM · HP ${max - (sh.hpLoss||0)} / ${max}</small></span><span class="go">›</span></button>`;
   }
-  return `<button class="btn-invoke" data-invoke><span><b>Invoquer un élémentaire</b><small>Choisir l'élémentaire et répartir les PM</small></span><span class="go">›</span></button>`;
+  if (essai) return `<button class="${cls}" data-invoke><span><b>Découvrir l'invocation</b><small>Sort pas encore appris : simuler un élémentaire pour voir comment il fonctionne</small></span><span class="go">›</span></button>`;
+  return `<button class="${cls}" data-invoke><span><b>Invoquer un élémentaire</b><small>Choisir l'élémentaire et répartir les PM</small></span><span class="go">›</span></button>`;
 }
 function renderInvoke(camp, pc){
   if (!ELEM){
@@ -938,6 +954,7 @@ function renderInvoke(camp, pc){
       <div class="top"><button class="inv-back" data-inv-back>‹ Sorts</button><span class="camp">${esc(camp.name)}</span></div>
       <div class="pj">Invocation</div>
       <div class="inv-who">${esc(who)}</div>
+      ${invAccess() === "essai" ? `<div class="inv-essai">Simulation : ${esc(pc ? pc.name : "")} n'a pas encore appris le sort. L'élémentaire simulé est rangé à part et ne sera pas repris une fois le sort appris.</div>` : ""}
       <div class="seg" role="group" aria-label="Invocation">
         <button data-inv-tab="prep" aria-pressed="${st.tab === "prep"}">Préparer</button>
         <button data-inv-tab="fiche" aria-pressed="${st.tab === "fiche"}" ${st.sheet ? "" : "disabled"}>Élémentaire${st.sheet ? `<span class="n">${esc(st.sheet.elem)}</span>` : ""}</button>
