@@ -300,6 +300,10 @@ button,input,select{font:inherit;color:inherit}
 const MODE = "site";                 // "mj" (page du MJ) ou "site" (site des joueurs)
 const EMBEDDED_XLSX = "";
 const SITE_FILES = {};
+const BUILD = "2026-10-18T20:12:01Z";                 // date de construction, fixée par build_mj.py
+/* Copie de la page MJ telle qu'elle a été chargée (avant tout affichage), pour la mettre en ligne avec le site. */
+const SELF_HTML = MODE === "mj" ? "<!doctype html>\n" + document.documentElement.outerHTML + "\n" : "";
+const buildLabel = b => /^\d{4}-/.test(b) ? new Date(b).toLocaleString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" }) : b;
 const LS_CUR = "grimoires.current", LS_PREV = "grimoires.previous", LS_GH = "grimoires.github", LS_ROUTE = "grimoires.lastRoute";
 
 /* ---------- utils ---------- */
@@ -610,7 +614,19 @@ async function installSite(){
   BUSY = true; setMsg("Installation du site…");
   try {
     let n = 0;
-    for (const [path, text] of Object.entries(SITE_FILES)){
+    const files = { ...SITE_FILES };
+    if (SELF_HTML){
+      /* La page MJ se met elle-même en ligne, sauf si celle du site est plus récente. */
+      const o = await GH.get("mj.html");
+      const ob = o && (o.text.match(/const BUILD = "([^"]*)"/) || [])[1];
+      if (ob && /^\d{4}-/.test(ob) && (!/^\d{4}-/.test(BUILD) || ob > BUILD)){
+        BUSY = false;
+        setMsg(`La page MJ en ligne (version du ${buildLabel(ob)}) est plus récente que celle-ci (${buildLabel(BUILD)}). Rien n'a été modifié. Utilise plutôt la page en ligne : ${GH.siteUrl()}mj.html`, "err");
+        return;
+      }
+      files["mj.html"] = SELF_HTML;
+    }
+    for (const [path, text] of Object.entries(files)){
       const o = await GH.get(path);
       if (o && o.text === text) continue;
       await GH.put(path, text, o && o.sha, `Site : ${path}`); n++;
@@ -622,7 +638,7 @@ async function installSite(){
       catch(e){ BUSY = false; setMsg(`Fichiers du site en place. Il reste à activer la publication : dans GitHub, Settings → Pages → Branch « ${repo.default_branch || "main"} » → Save.`, "err"); return; }
     }
     BUSY = false;
-    setMsg(`${n ? "Site installé" : "Site déjà à jour"}. Adresse : ${GH.siteUrl()} (la première mise en ligne peut prendre quelques minutes).`, "ok");
+    setMsg(`${n ? "Site installé" : "Site déjà à jour"}, page MJ en ligne comprise (version du ${buildLabel(BUILD)}). Adresse : ${GH.siteUrl()} (les changements peuvent mettre quelques minutes à apparaître).`, "ok");
   } catch(e){ BUSY = false; setMsg(ghError(e), "err"); }
 }
 function renderPub(){
@@ -1280,6 +1296,7 @@ function readFile(file){
   r.readAsArrayBuffer(file);
 }
 function initMJ(){
+  const vb = $("#mjBuild"); if (vb) vb.textContent = "Version du " + buildLabel(BUILD) + ".";
   if (new URLSearchParams(location.search).has("joueur")) $("#desk").classList.add("player-only");
   const drop = $("#drop");
   $("#file").onchange = e => e.target.files[0] && readFile(e.target.files[0]);
