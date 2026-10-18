@@ -247,6 +247,8 @@ button,input,select{font:inherit;color:inherit}
 .upg .ctl .round{width:30px;height:30px;font-size:1rem}
 .upg .ctl .c{min-width:16px;text-align:center;font-weight:700}
 .upg.info{opacity:.75}
+.inv .facts.stat-base{margin-top:12px}
+.inv .facts.stat-base dd small{color:var(--ink-3)}
 .inv-go{display:block;width:100%;margin-top:20px;padding:13px;font-family:var(--serif);font-size:1.1rem;border-radius:12px}
 .el-head{display:flex;align-items:center;gap:12px;margin:12px 0 4px;padding:10px 12px;border:1px solid var(--line);border-left:4px solid var(--el);border-radius:12px;background:var(--bg-2)}
 .el-head img{height:68px;width:auto}
@@ -991,7 +993,12 @@ function renderPrep(st){
       <img src="${d.img}" alt=""><span class="nm">${esc(d.name)}</span><span class="sub">${esc(d.element)}</span></button>`).join("");
   let pips = "";
   for (let i = 0; i < 8; i++) pips += `<span class="slot ${i >= total ? "off" : i < used ? "on" : ""}"></span>`;
-  const upgRows = catalogue(R, rule).map(u => {
+  /* Caractéristiques : améliorables (catalogue) ou fixes (POW, DEX des gnomes…), affichées dans l'ordre STR→DEX. */
+  const cat = catalogue(R, rule), iP = pmIdx(st.pm);
+  const fixedStat = s => { const d = R.stats[s]; return { fixed: true, key: s, dice: d.min[iP] + "D6" + (d.bonus ? "+" + d.bonus : "") }; };
+  const ordered = [...STATS6.map(s => cat.find(u => u.key === s) || fixedStat(s)), ...cat.filter(u => !STATS6.includes(u.key))];
+  const upgRows = ordered.map(u => {
+    if (u.fixed) return `<div class="upg info"><div class="nm">${u.key}<small>suit la table, non améliorable</small></div><div class="proj"><b>${u.dice}</b></div><div></div></div>`;
     const c = st.up[u.key] || 0, p = projection(R, st.pm, st.up, u.key, rule);
     let dmg = "";
     if (u.key.startsWith("ROLL:") && u.key !== "ROLL:Dodge"){
@@ -1028,7 +1035,9 @@ function renderPrep(st){
     </div>
     ${rule ? `<p class="note">Chaque ${freeWord()} libre investi dans une compétence ou une attaque ajoute ${rule.step}% aux chances (${rule.stepOver}% au-delà de ${rule.cap}%). Les dommages des attaques se calculent comme si chaque ${freeWord()} ajoutait 10%.</p>` : ""}
     ${st.mode === "libre" ? `<div>${upgRows}${drown}</div>`
-      : `<p class="note">Les ${total} ${freeWords()} libres seront répartis au hasard parmi les améliorations autorisées, puis l'élémentaire sera manifesté.</p>`}
+      : `<p class="note">Les ${total} ${freeWords()} libres seront répartis au hasard parmi les améliorations autorisées, puis l'élémentaire sera manifesté.</p>
+        <dl class="facts stat-base">${STATS6.map(s => `<div><dt>${s}</dt><dd>${fixedStat(s).dice}${cat.some(u => u.key === s) ? "" : "<small>non améliorable</small>"}</dd></div>`).join("")}</dl>
+        <p class="note">Caractéristiques avant répartition des ${freeWords()} libres.</p>`}
     ${replace}
     <button class="btn primary inv-go" id="invGo">${st.mode === "alea" ? "Tirer au sort et manifester" : "Manifester l'élémentaire"}</button>`;
 }
