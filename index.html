@@ -196,12 +196,16 @@ button,input,select{font:inherit;color:inherit}
 .tag.learning-tag{border-color:var(--loi);color:var(--loi);border-style:dashed}
 .nodata{padding:40px 20px;text-align:center;color:var(--ink-2)}
 .mj-pcs{padding-top:0}
+.btn.small{padding:3px 10px;font-size:.85rem}
+.camp-alt{color:var(--ink-3)}
+.links a.copy{text-decoration:none}
 .chip.learn-chip{border-style:dashed;border-color:var(--loi);color:var(--loi)}
 .chip.learn-chip[aria-pressed="true"]{background:var(--loi);border-color:var(--loi);color:var(--bg)}
 .chip .n{opacity:.75;margin-left:2px}
 .mj-who{color:var(--ink-3)}
 .mj-legend{margin:0 0 6px;font-size:.82rem}
 .tag.hidden-tag{border-style:dashed;color:var(--warn);border-color:var(--warn)}
+.tag{white-space:nowrap}
 /* ---------- invocation des élémentaires ---------- */
 .btn-invoke{display:flex;width:100%;justify-content:space-between;align-items:center;gap:10px;margin:0 0 16px;background:var(--bg-2);border:1px solid var(--balance);border-radius:12px;padding:12px 14px;cursor:pointer;text-align:left}
 .btn-invoke b{font-family:var(--serif);font-size:1.05rem}
@@ -300,7 +304,7 @@ button,input,select{font:inherit;color:inherit}
 const MODE = "site";                 // "mj" (page du MJ) ou "site" (site des joueurs)
 const EMBEDDED_XLSX = "";
 const SITE_FILES = {};
-const BUILD = "2026-10-18T20:12:01Z";                 // date de construction, fixée par build_mj.py
+const BUILD = "2026-10-19T11:08:47Z";                 // date de construction, fixée par build_mj.py
 /* Copie de la page MJ telle qu'elle a été chargée (avant tout affichage), pour la mettre en ligne avec le site. */
 const SELF_HTML = MODE === "mj" ? "<!doctype html>\n" + document.documentElement.outerHTML + "\n" : "";
 const buildLabel = b => /^\d{4}-/.test(b) ? new Date(b).toLocaleString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" }) : b;
@@ -512,6 +516,9 @@ const ui = { tab:"grimoire", q:"", mem:true, al:new Set(), form:new Set(), mjPc:
 /* Grimoire du MJ : route #<campagne>/mj, uniquement sur la page MJ (jamais publié sur le site des joueurs). */
 const MJ_ID = "mj";
 const isMjView = () => MODE === "mj" && route().p === MJ_ID;
+/* Page MJ en plein écran, présentée comme celle des joueurs : mj.html?grimoire#<campagne>/mj */
+const MJ_FULL = MODE === "mj" && /[?&](grimoire|joueur)\b/.test(location.search);
+const mjFullUrl = c => (GH.ready() ? GH.siteUrl() + "mj.html" : "mj.html") + "?grimoire#" + encodeURIComponent(c) + "/" + MJ_ID;
 
 function route(){
   const [c, p, v] = location.hash.replace(/^#\/?/,"").split("/").map(decodeURIComponent);
@@ -535,7 +542,7 @@ function renderMJ(){
     const pcs = M.pcs.filter(p => norm(p.campaign) === norm(c.name));
     const cur = current();
     return `<div class="camp-name">${esc(c.name)}${c.active ? "" : ' <span class="muted">(inactive)</span>'}</div>
-      <ul class="links"><li class="${cur.mj && cur.camp && cur.camp.id === c.id ? "cur" : ""}"><a href="#${encodeURIComponent(c.id)}/${MJ_ID}">Grimoire du MJ</a><span><code>page MJ uniquement</code></span></li>${pcs.map(p => `<li class="${cur.pc && cur.pc.name===p.name ? "cur":""}"><a href="#${encodeURIComponent(c.id)}/${encodeURIComponent(p.id)}">${esc(p.name)}${p.active?"":' <span class="muted">(inactif)</span>'}</a><span>${GH.ready() ? `<code>${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}</code><button class="copy" data-copy="${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}">copier</button>` : `<code>…/#${esc(c.id)}/${esc(p.id)}</code>`}</span></li>`).join("") || '<li class="muted">Aucun PJ</li>'}</ul>`;
+      <ul class="links"><li class="${cur.mj && cur.camp && cur.camp.id === c.id ? "cur" : ""}"><a href="#${encodeURIComponent(c.id)}/${MJ_ID}">Grimoire du MJ</a><span><a class="copy" href="${esc(mjFullUrl(c.id))}" target="_blank" rel="noopener">plein écran ↗</a>${GH.ready() ? `<button class="copy" data-copy="${esc(mjFullUrl(c.id))}">copier</button>` : ""}</span></li>${pcs.map(p => `<li class="${cur.pc && cur.pc.name===p.name ? "cur":""}"><a href="#${encodeURIComponent(c.id)}/${encodeURIComponent(p.id)}">${esc(p.name)}${p.active?"":' <span class="muted">(inactif)</span>'}</a><span>${GH.ready() ? `<code>${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}</code><button class="copy" data-copy="${esc(GH.siteUrl())}#${esc(c.id)}/${esc(p.id)}">copier</button>` : `<code>…/#${esc(c.id)}/${esc(p.id)}</code>`}</span></li>`).join("") || '<li class="muted">Aucun PJ</li>'}</ul>`;
   }).join("");
   $("#issues").innerHTML = M.issues.length
     ? M.issues.map(i => typeof i === "string" ? `<li>${esc(i)}</li>` : `<li class="info">${esc(i.text)}</li>`).join("")
@@ -699,7 +706,11 @@ function spellRow(s, g, extra=""){
 }
 function renderApp(keepScroll){
   const app = $("#app");
-  if (!M){ app.innerHTML = `<div class="nodata">${MODE === "site" ? "Chargement…" : "Aucune donnée. Importe « Sorts du groupe.xlsx »."}</div>`; return; }
+  if (!M){
+    app.innerHTML = `<div class="nodata">${MODE === "site" ? "Chargement…" : `Aucune donnée. Importe « Sorts du groupe.xlsx ».${MJ_FULL ? '<br><br><button class="btn primary" data-import>Importer le fichier</button>' : ""}`}</div>`;
+    const ib = app.querySelector("[data-import]"); if (ib) ib.onclick = () => $("#file").click();
+    return;
+  }
   const { camp, view, pc } = current();
   if (!camp){ app.innerHTML = `<div class="nodata">Aucune campagne dans le fichier.</div>`; return; }
   const sc = app.querySelector(".scroll"); const st = keepScroll && sc ? sc.scrollTop : 0;
@@ -720,7 +731,8 @@ function renderApp(keepScroll){
     app.innerHTML = `
     <div class="scroll">
       <header class="head">
-        <div class="top"><span class="camp">${esc(camp.name)}</span></div>
+        <div class="top"><span class="camp">${esc(camp.name)}${MJ_FULL ? M.campaigns.filter(c => c.id !== camp.id).map(c => ` · <a class="camp-alt" href="#${encodeURIComponent(c.id)}/${MJ_ID}">${esc(c.name)}</a>`).join("") : ""}</span>
+          ${MJ_FULL ? '<button class="btn small" data-import title="Importer une nouvelle version de « Sorts du groupe.xlsx »">Importer</button>' : ""}</div>
         <div class="pj">Grimoire du MJ</div>
         <div class="inv-who">Tous les sorts, tous les grimoires, tous les ouvrages.</div>
       </header>
@@ -922,6 +934,7 @@ function bindApp(){
   app.querySelectorAll("[data-al]").forEach(b => b.onclick = () => { const v=b.dataset.al; ui.al.has(v)?ui.al.delete(v):ui.al.add(v); renderApp(true); });
   app.querySelectorAll("[data-form]").forEach(b => b.onclick = () => { const v=b.dataset.form; ui.form.has(v)?ui.form.delete(v):ui.form.add(v); renderApp(true); });
   const r = app.querySelector("#reset"); if (r) r.onclick = () => { ui.q=""; ui.al.clear(); ui.form.clear(); renderApp(); };
+  app.querySelectorAll("[data-import]").forEach(b => b.onclick = () => $("#file").click());
   app.querySelectorAll("[data-mjpc]").forEach(b => b.onclick = () => { ui.mjPc = b.dataset.mjpc; renderApp(true); });
   app.querySelectorAll("[data-spell]").forEach(b => b.onclick = () => openSpell(b.dataset.spell));
 }
@@ -1280,6 +1293,7 @@ function load(data, {fromFile} = {}){
   if (fromFile){ if (prev) store.set(LS_PREV, prev); store.set(LS_CUR, data); }
   const p = fromFile ? prev : store.get(LS_PREV);
   M = buildModel(data);
+  if (MJ_FULL && route().p !== MJ_ID){ const c = M.campaigns.find(x => x.id === route().c) || M.campaigns.find(x => x.active) || M.campaigns[0]; if (c) history.replaceState(null, "", "#" + encodeURIComponent(c.id) + "/" + MJ_ID); }
   if (GH.ready()){ DIFF = null; DIFF_BASE = "online"; refreshOnline(); }
   else { DIFF_BASE = "import"; DIFF = p ? diff(mergeViews(publishedViews(buildModel(p))), mergeViews(publishedViews(M))) : null; }
   const n = M.issues.filter(i => typeof i === "string").length;
@@ -1291,13 +1305,19 @@ function readFile(file){
   const r = new FileReader();
   r.onload = () => {
     try { load(parseWorkbook(XLSX.read(r.result, {type:"array"})), {fromFile:true}); }
-    catch(e){ $("#status").innerHTML = `<strong style="color:var(--warn)">Import impossible :</strong> ${esc(e.message)}`; }
+    catch(e){
+      $("#status").innerHTML = `<strong style="color:var(--warn)">Import impossible :</strong> ${esc(e.message)}`;
+      if (MJ_FULL) $("#app").insertAdjacentHTML("afterbegin", `<div class="nodata" style="color:var(--warn)">Import impossible : ${esc(e.message)}</div>`);
+    }
   };
   r.readAsArrayBuffer(file);
 }
 function initMJ(){
   const vb = $("#mjBuild"); if (vb) vb.textContent = "Version du " + buildLabel(BUILD) + ".";
-  if (new URLSearchParams(location.search).has("joueur")) $("#desk").classList.add("player-only");
+  if (MJ_FULL){
+    $("#desk").classList.add("player-only");
+    if (!location.hash.replace(/^#\/?/,"")){ const d = store.get(LS_CUR); const c = d && ((d.campaigns || []).find(x => x.active) || (d.campaigns || [])[0]); if (c) history.replaceState(null, "", "#" + encodeURIComponent(c.id || slug(c.name)) + "/" + MJ_ID); }
+  }
   const drop = $("#drop");
   $("#file").onchange = e => e.target.files[0] && readFile(e.target.files[0]);
   ["dragenter","dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
