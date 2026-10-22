@@ -304,7 +304,7 @@ button,input,select{font:inherit;color:inherit}
 const MODE = "site";                 // "mj" (page du MJ) ou "site" (site des joueurs)
 const EMBEDDED_XLSX = "";
 const SITE_FILES = {};
-const BUILD = "2026-10-19T11:08:47Z";                 // date de construction, fixée par build_mj.py
+const BUILD = "2026-10-22T23:53:40Z";                 // date de construction, fixée par build_mj.py
 /* Copie de la page MJ telle qu'elle a été chargée (avant tout affichage), pour la mettre en ligne avec le site. */
 const SELF_HTML = MODE === "mj" ? "<!doctype html>\n" + document.documentElement.outerHTML + "\n" : "";
 const buildLabel = b => /^\d{4}-/.test(b) ? new Date(b).toLocaleString("fr-FR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" }) : b;
@@ -1019,6 +1019,13 @@ function skillPct(base, n, rule){
   return v;
 }
 const dmgPct = (base, n) => base + n*10;
+/* Chances d'une attaque ou du Dodge pour les PM investis, avant points libres.
+   Sans règle de campagne : la valeur de la table. Avec règle (Stormbringer) : chaque palier de +10 % de la table
+   compte comme un pas de la règle (+5 %, +1 % au-delà de 90 %), à partir de la valeur à 21 PM. Les dommages restent sur la table. */
+function rollBase(R, roll, i, rule){
+  const v = R.rolls[roll];
+  return rule ? skillPct(v[0], Math.round((v[i] - v[0]) / 10), rule) : v[i];
+}
 const stepLabel = rule => rule ? "+" + rule.step + "%" : "+10%";
 const stepSub = rule => rule ? `+${rule.stepOver}% au-delà de ${rule.cap}%` : "";
 const pmIdx = pm => pm < 30 ? 0 : pm - 29;
@@ -1044,7 +1051,7 @@ function projection(R, pm, up, key, rule){
   const i = pmIdx(pm), c = up[key] || 0;
   if (STATS6.includes(key)){ const s = R.stats[key], b = s.bonus ? "+" + s.bonus : ""; return { base:s.min[i]+"D6"+b, now:(s.min[i]+c)+"D6"+b }; }
   if (key.startsWith("MOV:")){ const v = R.mov[key.slice(4)][i]; return { base:""+v, now:""+(v+c*2) }; }
-  if (key.startsWith("ROLL:")){ const v = R.rolls[key.slice(5)][i]; return { base:v+"%", now:skillPct(v, c, rule)+"%" }; }
+  if (key.startsWith("ROLL:")){ const v = rollBase(R, key.slice(5), i, rule); return { base:v+"%", now:skillPct(v, c, rule)+"%" }; }
   if (key.startsWith("SKILL:")){ const e = R.fixedSkills.find(s => s[0] === key.slice(6)); const v = e ? e[1] : 0; return { base:v+"%", now:skillPct(v, c, rule)+"%" }; }
   if (key === "LANG") return { base:"INT×2", now: !c ? "INT×2" : rule ? `INT×2, ${c} PM` : "INT×2 +" + c*10 + "%" };
   return { base:"", now:"" };
@@ -1197,13 +1204,13 @@ function renderSheet(st){
   const movs = Object.keys(R.mov).map(m => `<div><dt>MOV ${frMov(m)}</dt><dd class="${up["MOV:"+m] ? "up" : ""}">${R.mov[m][i] + (up["MOV:"+m] || 0)*2}</dd></div>`).join("");
   const dbTxt = /D6/.test(imp) ? "+" + imp : imp;
   const atks = Object.keys(R.rolls).filter(r => r !== "Dodge").map(r => {
-    const n = up["ROLL:"+r] || 0, pct = skillPct(R.rolls[r][i], n, rule), dpct = dmgPct(R.rolls[r][i], n), ranged = R.rangedAttacks.includes(r);
+    const n = up["ROLL:"+r] || 0, pct = skillPct(rollBase(R, r, i, rule), n, rule), dpct = dmgPct(R.rolls[r][i], n), ranged = R.rangedAttacks.includes(r);
     let range = "";
     if (ranged){ const n2 = parseInt(imp, 10); range = ` · portée ${/D6/.test(imp) ? imp : Math.max(1, isNaN(n2) ? 1 : n2)} m`; }
     return `<div class="line ${up["ROLL:"+r] ? "up" : ""}"><div class="nm">${esc(r)}${up["ROLL:"+r] ? '<span class="upm">▲</span>' : ""}<span class="pct">${pct}%</span><small>normal / critique${R.dbAttacks.includes(r) ? ", DB inclus" : ""}${range}</small></div><div class="v">${dmgPair(R, r, dpct, imp)}</div></div>`;
   }).join("") + (R.hasDrown ? `<div class="line"><div class="nm">Drown by Touch<span class="pct">${v.STR*3}%</span><small>STR×3 · ignore l'armure · ne peut qu'être esquivé · si réussi, la victime perd ses attaques pendant 4 secondes</small></div><div class="v">1D6 / 2D6</div></div>` : "");
   const skills = [];
-  if (R.rolls.Dodge) skills.push([ "Dodge", skillPct(R.rolls.Dodge[i], up["ROLL:Dodge"] || 0, rule), up["ROLL:Dodge"] ]);
+  if (R.rolls.Dodge) skills.push([ "Dodge", skillPct(rollBase(R, "Dodge", i, rule), up["ROLL:Dodge"] || 0, rule), up["ROLL:Dodge"] ]);
   R.fixedSkills.forEach(([sk, val]) => skills.push([ frSkill(sk), skillPct(val, up["SKILL:"+sk] || 0, rule), up["SKILL:"+sk] ]));
   skills.push([ "Langue de l'invocateur", skillPct(v.INT*2, up.LANG || 0, rule), up.LANG, "INT×2" ]);
   const recap = catalogue(R, rule).filter(u => up[u.key]).map(u => {
